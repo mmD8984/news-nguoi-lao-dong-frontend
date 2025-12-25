@@ -1,0 +1,18 @@
+/* Error: Invalid UTF-8.
+ *     ,
+ * 322 |     content: "�?�";
+ *     |               ^
+ *     '
+ *   pages\article.scss 322:15  @import
+ *   app.scss 13:9              root stylesheet */
+
+body::before {
+  font-family: "Source Code Pro", "SF Mono", Monaco, Inconsolata, "Fira Mono",
+      "Droid Sans Mono", monospace, monospace;
+  white-space: pre;
+  display: block;
+  padding: 1em;
+  margin-bottom: 1em;
+  border-bottom: 2px solid black;
+  content: 'Error: Invalid UTF-8.\a     \2577 \a 322 \2502      content: "\fffd ?\fffd ";\d\a     \2502                ^\a     \2575 \a   pages\\article.scss 322:15  @import\a   app.scss 13:9              root stylesheet';
+}

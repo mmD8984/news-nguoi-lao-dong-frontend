@@ -5,7 +5,7 @@ import {PersistGate} from 'redux-persist/integration/react';
 import {persistor, store} from './store/store';
 
 import App from './App';
-import './styles/index.css';
+import './styles/app.scss';
 import 'react-toastify/dist/ReactToastify.css';
 
 createRoot(document.getElementById('root')!).render(
