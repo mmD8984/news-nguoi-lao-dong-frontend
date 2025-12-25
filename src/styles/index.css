@@ -1,0 +1,14 @@
+@import "./variables.css";
+@import "./base.css";
+@import "./utilities.css";
+@import "./components.css";
+@import "./header.css";
+@import "./news-card.css";
+@import "./category.css";
+@import "./footer.css";
+@import "./home.css";
+@import "./profile.css";
+@import "./article.css";
+@import "./sidebar.css";
+@import "./auth.css";
+@import "./responsive.css";

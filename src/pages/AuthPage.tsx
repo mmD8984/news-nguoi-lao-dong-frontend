@@ -80,7 +80,7 @@ function AuthPage() {
 
     async function handleGoogleClick() {
         try {
-            await dispatch(googleLoginUser({email, password})).unwrap();
+            await dispatch(googleLoginUser()).unwrap();
             toast.success("Đăng nhập Google thành công");
             setTimeout(() => navigate('/profile'), 1000);
         } catch (msg) {

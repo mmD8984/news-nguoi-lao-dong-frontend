@@ -1,0 +1,32 @@
+.trending-bar__icon {
+    width: 32px;
+    height: 32px;
+}
+
+.trending-bar__label {
+    font-size: var(--fs-lg);
+}
+
+.trending-bar__tags {
+    white-space: nowrap;
+    scroll-behavior: smooth;
+}
+
+.trending-bar__tag {
+    background-color: #f5f5f5;
+    font-size: var(--fs-base);
+    font-weight: 500;
+}
+
+.trending-bar__nav-btn {
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+}
+
+.go-top-button {
+    width: 40px;
+    height: 40px;
+    z-index: 1000;
+    transition: all var(--transition-base);
+}

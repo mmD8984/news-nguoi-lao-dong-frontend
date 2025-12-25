@@ -76,6 +76,9 @@ export async function loginWithGoogle(): Promise<User> {
     }
 }
 
+/**
+ * Đăng xuất tài khoản (clear firebase session)
+ */
 export async function logout(): Promise<void> {
     try {
         await signOut(auth);

@@ -1,0 +1,13 @@
+.sidebar-header-custom {
+    font-family: var(--font-secondary);
+    font-weight: 700;
+    color: var(--nld-blue) !important;
+    border-bottom: 2px solid var(--nld-blue) !important;
+    padding-bottom: var(--spacing-2);
+    margin-bottom: var(--spacing-4);
+    display: inline-block;
+}
+
+.sidebar-box {
+    margin-bottom: var(--spacing-5);
+}
