@@ -16,7 +16,7 @@ import {getArticleById, getArticlesByCategory, getCategories} from '../services/
 import type {Article, NavItem} from '../types';
 import {ViewMode} from '../types';
 import {useAppDispatch, useAppSelector} from '../store/hooks';
-import {toggleSavedArticle} from '../store/userSlice';
+import {toggleSavedArticle} from '../store/user/user.slice.ts';
 
 type Notice = { variant: 'success' | 'secondary'; message: string };
 type BreadcrumbItem = { label: string; to: string };

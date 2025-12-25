@@ -1,13 +1,6 @@
-import {createSlice, type PayloadAction} from '@reduxjs/toolkit';
-
-export interface User {
-    id: string;
-    displayName: string;
-    avatar: string;
-    emailOrPhone: string;
-    gender: 'male' | 'female' | 'other' | null;
-    savedArticleIds: string[];
-}
+﻿import {createSlice, type PayloadAction} from '@reduxjs/toolkit';
+import type {User} from '@/types/user/user.types.ts';
+import {googleLoginUser, loginUser, logoutUser, registerUser} from "./user.actions.ts";
 
 type UpdateProfilePayload = Partial<Pick<User, 'displayName' | 'avatar' | 'gender'>>;
 
@@ -56,6 +49,24 @@ const userSlice = createSlice({
             else
                 user.savedArticleIds.unshift(articleId);
         },
+    },
+    extraReducers: (builder) => {
+        // Đăng ký tài khoản với email, password
+        builder.addCase(registerUser.fulfilled, (state, action) => {
+            state.currentUser = action.payload;
+        });
+        // Đăng nhập bằng email, password
+        builder.addCase(loginUser.fulfilled, (state, action) => {
+            state.currentUser = action.payload;
+        });
+        // Đăng nhập bằng Google
+        builder.addCase(googleLoginUser.fulfilled, (state, action) => {
+            state.currentUser = action.payload;
+        });
+        // Đăng xuất
+        builder.addCase(logoutUser.fulfilled, (state) => {
+            state.currentUser = null;
+        });
     }
 });
 

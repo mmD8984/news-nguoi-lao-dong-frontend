@@ -1,8 +1,9 @@
-import { lazy, Suspense } from "react";
-import { BrowserRouter, Route, Routes, Outlet } from "react-router-dom";
+import {lazy, Suspense} from "react";
+import {BrowserRouter, Outlet, Route, Routes} from "react-router-dom";
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ScrollToTop from '../components/ScrollToTop';
+import {ToastContainer} from "react-toastify";
 
 const HomePage = lazy(() => import('../pages/HomePage'));
 const ArticlePage = lazy(() => import('../pages/ArticlePage'));
@@ -14,12 +15,24 @@ const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 function Layout() {
     return (
         <div className="d-flex flex-column min-vh-100 bg-white text-dark position-relative">
-            <ScrollToTop />
-            <Header />
+            <ScrollToTop/>
+            <Header/>
             <main className="flex-grow-1">
-                <Outlet />
+                <Outlet/>
             </main>
-            <Footer />
+            <Footer/>
+
+            <ToastContainer
+                position="top-right"
+                autoClose={2500}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            />
         </div>
     );
 }
@@ -30,27 +43,27 @@ const Router = () => {
             <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
                     {/* Tài khoản */}
-                    <Route path="/login" element={<AuthPage />} />
-                    <Route path="/register" element={<AuthPage />} />
+                    <Route path="/login" element={<AuthPage/>}/>
+                    <Route path="/register" element={<AuthPage/>}/>
 
-                    <Route path="/" element={<Layout />}>
+                    <Route path="/" element={<Layout/>}>
                         {/* Trang chủ */}
-                        <Route index element={<HomePage />} />
+                        <Route index element={<HomePage/>}/>
 
                         {/* Trang báo */}
-                        <Route path="article/:id" element={<ArticlePage />} />
+                        <Route path="article/:id" element={<ArticlePage/>}/>
 
                         {/* Tìm kiếm */}
-                        <Route path="search" element={<SearchPage />} />
+                        <Route path="search" element={<SearchPage/>}/>
 
                         {/* Trang tài khoản */}
-                        <Route path="profile" element={<ProfilePage />} />
+                        <Route path="profile" element={<ProfilePage/>}/>
 
                         {/* Trang danh mục
                           - /quoc-te
                           - /quoc-te/nguoi-viet-do-day */}
-                        <Route path=":category/:subCategory" element={<CategoryPage />} />
-                        <Route path=":category" element={<CategoryPage />} />
+                        <Route path=":category/:subCategory" element={<CategoryPage/>}/>
+                        <Route path=":category" element={<CategoryPage/>}/>
                     </Route>
                 </Routes>
             </Suspense>

@@ -1,16 +1,12 @@
-import {useMemo, useState} from 'react';
+﻿import {useMemo, useState} from 'react';
 import {Link, useLocation, useNavigate} from 'react-router-dom';
 import {Button, Col, Container, Form, Row, Tab, Tabs} from 'react-bootstrap';
-import Footer from '../components/Footer';
-import {useAppDispatch} from '../store/hooks';
-import {setUser, type User} from '../store/userSlice';
-import {iconGoogle, iconZalo} from '../assets';
+import {toast, ToastContainer} from "react-toastify";
 
-// Tạo id user demo
-function generateAccountId() {
-    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
-    return `u-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
+import Footer from '@/components/Footer';
+import {useAppDispatch} from '@/store/hooks';
+import {iconGoogle} from '@/assets';
+import {googleLoginUser, loginUser, registerUser} from "@/store/user/user.actions.ts";
 
 function AuthPage() {
     const location = useLocation();
@@ -21,20 +17,19 @@ function AuthPage() {
     const isRegisterPath = location.pathname === '/register';
     const [activeTab, setActiveTab] = useState(isRegisterPath ? 'register' : 'login');
 
-    // Form state (demo)
-    const [emailOrPhone, setEmailOrPhone] = useState('');
-    const [displayName, setDisplayName] = useState('');
-    const [gender, setGender] = useState<User['gender']>(null);
+    // Trạng thái form ban đầu
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [fullName, setFullName] = useState('');
 
-    // Validate tối thiểu cho register
+    // Validate tối thiểu cho đăng ký
     const canRegister = useMemo(
         function () {
-            if (!emailOrPhone.trim())
+            if (!fullName.trim())
                 return false;
 
-            if (!displayName.trim())
+            if (!email.trim())
                 return false;
 
             if (!password)
@@ -45,69 +40,52 @@ function AuthPage() {
 
             return true;
         },
-        [confirmPassword, displayName, emailOrPhone, password]
+        [confirmPassword, email, fullName, password]
     );
 
-    // User demo cho login (để test UI)
-    const loginUser: User = useMemo(
-        function () {
-            return {
-                id: 'u-001',
-                displayName: displayName.trim() || 'Sinh viên',
-                avatar: '',
-                emailOrPhone: emailOrPhone.trim() || 'sinhvien@st.hcmuaf.edu.vn',
-                gender: gender ?? null,
-                savedArticleIds: ['a-001', 'a-005']
-            };
-        },
-        [displayName, emailOrPhone, gender]
-    );
-
-    // Login
-    function handleLogin() {
-        dispatch(setUser(loginUser));
-        navigate('/profile');
-    }
-
-    // Register
-    function handleRegister() {
+    // Đăng ký
+    async function handleRegister() {
         if (!canRegister) return;
-        const newUser: User = {
-            id: generateAccountId(),
-            displayName: displayName.trim(),
-            avatar: '',
-            emailOrPhone: emailOrPhone.trim(),
-            gender: gender,
-            savedArticleIds: []
-        };
-        dispatch(setUser(newUser));
-        navigate('/profile');
+        try {
+            await dispatch(registerUser({email, password, fullName})).unwrap();
+            toast.success("Đăng ký tài khoản thành công");
+            setTimeout(() => navigate('/profile'), 1000);
+        } catch (msg) {
+            toast.error(String(msg));
+        }
     }
 
-    // Social login demo
-    function handleSocialLogin(provider: string) {
-        const socialUser: User = {
-            id: generateAccountId(),
-            displayName: `User ${provider}`,
-            avatar: '',
-            emailOrPhone: `${provider}@example.com`,
-            gender: null,
-            savedArticleIds: ['a-003']
-        };
-        dispatch(setUser(socialUser));
-        navigate('/profile');
+    // Đăng nhập
+    async function handleLogin() {
+        if (!email.trim() || !password) {
+            toast.error("Vui lòng nhập email và mật khẩu");
+            return;
+        }
+        try {
+            await dispatch(loginUser({email, password})).unwrap();
+            toast.success("Đăng nhập thành công");
+            setTimeout(() => navigate('/profile'), 1000);
+        } catch (msg) {
+            toast.error(String(msg));
+        }
     }
 
     function handleTabSelect(k: string | null) {
         setActiveTab(k || 'login');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setFullName('');
     }
 
-    function handleGoogleClick() {
-        handleSocialLogin('google');
-    }
-
-    function handleZaloClick() {
-        handleSocialLogin('zalo');
+    async function handleGoogleClick() {
+        try {
+            await dispatch(googleLoginUser({email, password})).unwrap();
+            toast.success("Đăng nhập Google thành công");
+            setTimeout(() => navigate('/profile'), 1000);
+        } catch (msg) {
+            toast.error(String(msg));
+        }
     }
 
     return (
@@ -131,12 +109,12 @@ function AuthPage() {
                                 {/* Form login */}
                                 <Form className="mt-4" onSubmit={(e) => e.preventDefault()}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold small">Email / Số điện thoại</Form.Label>
+                                        <Form.Label className="fw-bold small">Email</Form.Label>
                                         <Form.Control
-                                            type="text"
-                                            placeholder="Nhập Email / Số điện thoại"
-                                            value={emailOrPhone}
-                                            onChange={(e) => setEmailOrPhone(e.target.value)}
+                                            type="email"
+                                            placeholder="Nhập Email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
                                             className="py-2"
                                         />
                                     </Form.Group>
@@ -169,36 +147,25 @@ function AuthPage() {
                                 {/* Form register */}
                                 <Form className="mt-4" onSubmit={(e) => e.preventDefault()}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold small">Tên hiển thị</Form.Label>
+                                        <Form.Label className="fw-bold small">Họ và tên</Form.Label>
                                         <Form.Control
                                             type="text"
-                                            placeholder="Nhập tên hiển thị"
-                                            value={displayName}
-                                            onChange={(e) => setDisplayName(e.target.value)}
+                                            placeholder="Nhập họ và tên"
+                                            value={fullName}
+                                            onChange={(e) => setFullName(e.target.value)}
                                             className="py-2"
                                         />
                                     </Form.Group>
 
                                     <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold small">Email / Số điện thoại</Form.Label>
+                                        <Form.Label className="fw-bold small">Email</Form.Label>
                                         <Form.Control
-                                            type="text"
-                                            placeholder="Nhập Email / Số điện thoại"
-                                            value={emailOrPhone}
-                                            onChange={(e) => setEmailOrPhone(e.target.value)}
+                                            type="email"
+                                            placeholder="Nhập Email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
                                             className="py-2"
                                         />
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold small">Giới tính (tuỳ chọn)</Form.Label>
-                                        <Form.Select value={gender ?? ''}
-                                                     onChange={(e) => setGender((e.target.value as any) || null)}>
-                                            <option value="">Chưa chọn</option>
-                                            <option value="male">Nam</option>
-                                            <option value="female">Nữ</option>
-                                            <option value="other">Khác</option>
-                                        </Form.Select>
                                     </Form.Group>
 
                                     <Form.Group className="mb-3">
@@ -259,28 +226,30 @@ function AuthPage() {
                         <div className="d-flex gap-3">
                             <Button
                                 variant="outline-light"
-                                className="w-50 border text-dark d-flex align-items-center justify-content-center gap-2 py-2"
+                                className="w-100 border text-dark d-flex align-items-center justify-content-center gap-2 py-2"
                                 onClick={handleGoogleClick}
                             >
                                 <img src={iconGoogle} alt="Google" className="auth-page__social-icon"/>
                                 <span className="small fw-bold">Google</span>
-                            </Button>
-
-                            <Button
-                                variant="outline-light"
-                                className="w-50 border text-dark d-flex align-items-center justify-content-center gap-2 py-2"
-                                onClick={handleZaloClick}
-                            >
-                                <img src={iconZalo} alt="Zalo" className="auth-page__social-icon"/>
-                                <span className="small fw-bold">Zalo</span>
                             </Button>
                         </div>
                     </Col>
                 </Row>
             </Container>
 
-            {/* Footer */}
             <Footer/>
+
+            <ToastContainer
+                position="top-right"
+                autoClose={2500}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            />
         </div>
     );
 }
