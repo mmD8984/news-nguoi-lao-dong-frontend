@@ -1,15 +1,27 @@
-﻿import {
+import {
+    type ActionCodeSettings,
+    confirmPasswordReset,
     createUserWithEmailAndPassword,
     GoogleAuthProvider,
+    sendPasswordResetEmail,
     signInWithEmailAndPassword,
     signInWithPopup,
     signOut,
+    updateProfile,
     type User as FirebaseUser,
-} from 'firebase/auth';
-import {ref, serverTimestamp, set} from 'firebase/database';
+    verifyPasswordResetCode,
+} from "firebase/auth";
+import {get, ref, serverTimestamp, set} from "firebase/database";
 
-import {auth, db} from './firebase';
-import type {LoginRequest, RegisterRequest, User} from '@/types/user/user.types';
+import {auth, db} from "./firebase";
+import type {
+    ConfirmResetPasswordRequest,
+    LoginRequest,
+    RegisterRequest,
+    SendResetPasswordRequest,
+    User,
+    VerifyResetPasswordCodeRequest,
+} from "@/types/user/user.types";
 
 /**
  * Đăng ký tài khoản với email và password
@@ -25,16 +37,17 @@ export async function register(
         const credential = await createUserWithEmailAndPassword(auth, email, password);
         const fbUser = credential.user;
 
+        // Cập nhật displayName
+        await updateProfile(fbUser, {displayName: fullName.trim()});
+
         await set(ref(db, `users/${fbUser.uid}`), {
             uid: fbUser.uid,
             email,
             fullName: fullName.trim(),
-            dateOfBirth: null,
-            gender: null,
             createdAt: serverTimestamp(),
         });
 
-        return toUser(fbUser);
+        return toUser(fbUser, fullName.trim());
     } catch (e) {
         throw new Error(mapFirebaseError(e));
     }
@@ -70,6 +83,19 @@ export async function loginWithGoogle(): Promise<User> {
         const credential = await signInWithPopup(auth, provider);
         const fbUser = credential.user;
 
+        // Tạo bản ghi nếu chưa có trong Realtime Database
+        const userRef = ref(db, `users/${fbUser.uid}`);
+        const snapshot = await get(userRef);
+        if (!snapshot.exists()) {
+            await set(userRef, {
+                uid: fbUser.uid,
+                email: fbUser.email ?? "",
+                fullName: fbUser.displayName ?? "",
+                avatar: fbUser.photoURL ?? "",
+                createdAt: serverTimestamp(),
+            });
+        }
+
         return toUser(fbUser);
     } catch (e) {
         throw new Error(mapFirebaseError(e));
@@ -88,19 +114,65 @@ export async function logout(): Promise<void> {
 }
 
 /**
+ * Gửi email đặt lại mật khẩu
+ */
+export async function sendResetPassword(
+    {email, redirectUrl,}: SendResetPasswordRequest
+): Promise<void> {
+    const actionCodeSettings: ActionCodeSettings = {
+        url: redirectUrl ?? `${window.location.origin}/reset-password`,
+        handleCodeInApp: true,
+    };
+
+    try {
+        await sendPasswordResetEmail(auth, email, actionCodeSettings);
+    } catch (e) {
+        throw new Error(mapFirebaseError(e));
+    }
+}
+
+/**
+ * Kiểm tra oobCode và lấy email từ Firebase
+ */
+export async function verifyResetCode(
+    {oobCode}: VerifyResetPasswordCodeRequest
+): Promise<string> {
+    try {
+        return await verifyPasswordResetCode(auth, oobCode);
+    } catch (e) {
+        throw new Error(mapFirebaseError(e));
+    }
+}
+
+/**
+ * Cập nhật mật khẩu mới bằng oobCode
+ */
+export async function confirmResetPasswordApi(
+    {oobCode, newPassword}: ConfirmResetPasswordRequest
+): Promise<void> {
+    try {
+        await confirmPasswordReset(auth, oobCode, newPassword);
+    } catch (e) {
+        throw new Error(mapFirebaseError(e));
+    }
+}
+
+/**
  * ===== Utils ====
  */
 const AUTH_ERROR_MESSAGE: Record<string, string> = {
-    'auth/email-already-in-use': 'Email đã được sử dụng',
-    'auth/invalid-email': 'Email không hợp lệ',
-    'auth/weak-password': 'Mật khẩu quá yếu',
-    'auth/user-not-found': 'Tài khoản không tồn tại',
-    'auth/wrong-password': 'Sai mật khẩu',
-    'auth/too-many-requests': 'Thử lại sau (quá nhiều lần)',
-    'auth/invalid-credential': 'Email hoặc mật khẩu không đúng',
-    'auth/popup-closed-by-user': 'Bạn đã đóng cửa sổ đăng nhập',
-    'auth/cancelled-popup-request': 'Yêu cầu đăng nhập đã bị hủy',
-    'auth/popup-blocked': 'Trình duyệt đang chặn cửa sổ đăng nhập',
+    "auth/email-already-in-use": "Email đã được sử dụng",
+    "auth/invalid-email": "Email không hợp lệ",
+    "auth/weak-password": "Mật khẩu quá yếu",
+    "auth/user-not-found": "Tài khoản không tồn tại",
+    "auth/wrong-password": "Sai mật khẩu",
+    "auth/too-many-requests": "Thử lại sau (quá nhiều lần)",
+    "auth/invalid-credential": "Email hoặc mật khẩu không đúng",
+    "auth/popup-closed-by-user": "Bạn đã đóng cửa sổ đăng nhập",
+    "auth/cancelled-popup-request": "Yêu cầu đăng nhập đã bị hủy",
+    "auth/popup-blocked": "Trình duyệt chặn cửa sổ đăng nhập",
+    "auth/expired-action-code": "Mã xác thực đã hết hạn",
+    "auth/invalid-action-code": "Mã xác thực không hợp lệ",
 };
 
 function getAuthCode(e: unknown): string {
@@ -113,12 +185,12 @@ function mapFirebaseError(e: unknown): string {
     return AUTH_ERROR_MESSAGE[getAuthCode(e)] ?? 'Có lỗi xảy ra, vui lòng thử lại';
 }
 
-function toUser(user: FirebaseUser): User {
+function toUser(user: FirebaseUser, fallbackName?: string): User {
     return {
         id: user.uid,
-        displayName: user.displayName ?? '',
-        avatar: user.photoURL ?? '',
-        emailOrPhone: user.email ?? '',
+        displayName: user.displayName ?? fallbackName ?? "",
+        avatar: user.photoURL ?? "",
+        emailOrPhone: user.email ?? "",
         gender: null,
         savedArticleIds: [],
     };

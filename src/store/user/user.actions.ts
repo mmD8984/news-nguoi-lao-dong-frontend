@@ -1,6 +1,21 @@
-﻿import {createAsyncThunk} from "@reduxjs/toolkit";
-import type {LoginRequest, RegisterRequest, User} from "@/types/user/user.types.ts";
-import {login, loginWithGoogle, logout, register} from "@/services/user";
+import {createAsyncThunk} from "@reduxjs/toolkit";
+import type {
+    ConfirmResetPasswordRequest,
+    LoginRequest,
+    RegisterRequest,
+    SendResetPasswordRequest,
+    User,
+    VerifyResetPasswordCodeRequest,
+} from "@/types/user/user.types.ts";
+import {
+    confirmResetPasswordApi,
+    login,
+    loginWithGoogle,
+    logout,
+    register,
+    sendResetPassword,
+    verifyResetCode,
+} from "@/services/user";
 
 export const registerUser = createAsyncThunk<
     User, RegisterRequest,
@@ -36,12 +51,45 @@ export const googleLoginUser = createAsyncThunk<
 });
 
 export const logoutUser = createAsyncThunk<
-    void,
-    void,
+    void, void,
     { rejectValue: string }
->('user/logout', async (_, thunkApi) => {
+>("user/logout", async (_, thunkApi) => {
+        try {
+            await logout();
+        } catch (e) {
+            return thunkApi.rejectWithValue(mapError(e));
+        }
+    }
+);
+
+export const sendResetPasswordEmail = createAsyncThunk<
+    void, SendResetPasswordRequest,
+    { rejectValue: string }
+>("user/send-reset-password-email", async (payload, thunkApi) => {
     try {
-        await logout();
+        await sendResetPassword(payload);
+    } catch (e) {
+        return thunkApi.rejectWithValue(mapError(e));
+    }
+});
+
+export const verifyResetPasswordCode = createAsyncThunk<
+    string, VerifyResetPasswordCodeRequest,
+    { rejectValue: string }
+>("user/verify-reset-password-code", async (payload, thunkApi) => {
+    try {
+        return await verifyResetCode(payload);
+    } catch (e) {
+        return thunkApi.rejectWithValue(mapError(e));
+    }
+});
+
+export const confirmResetPassword = createAsyncThunk<
+    void, ConfirmResetPasswordRequest,
+    { rejectValue: string }
+>("user/confirm-reset-password", async (payload, thunkApi) => {
+    try {
+        await confirmResetPasswordApi(payload);
     } catch (e) {
         return thunkApi.rejectWithValue(mapError(e));
     }

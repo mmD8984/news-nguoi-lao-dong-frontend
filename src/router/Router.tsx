@@ -1,41 +1,17 @@
 import {lazy, Suspense} from "react";
-import {BrowserRouter, Outlet, Route, Routes} from "react-router-dom";
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import ScrollToTop from '../components/ScrollToTop';
-import {ToastContainer} from "react-toastify";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
 
-const HomePage = lazy(() => import('../pages/HomePage'));
-const ArticlePage = lazy(() => import('../pages/ArticlePage'));
-const AuthPage = lazy(() => import('../pages/AuthPage'));
-const CategoryPage = lazy(() => import('../pages/CategoryPage'));
-const SearchPage = lazy(() => import('../pages/SearchPage'));
-const ProfilePage = lazy(() => import('../pages/ProfilePage'));
+import AuthLayout from "../layout/AuthLayout";
+import MainLayout from "../layout/MainLayout";
 
-function Layout() {
-    return (
-        <div className="d-flex flex-column min-vh-100 bg-white text-dark position-relative">
-            <ScrollToTop/>
-            <Header/>
-            <main className="flex-grow-1">
-                <Outlet/>
-            </main>
-            <Footer/>
-
-            <ToastContainer
-                position="top-right"
-                autoClose={2500}
-                hideProgressBar={false}
-                newestOnTop
-                closeOnClick
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-            />
-        </div>
-    );
-}
+const HomePage = lazy(() => import("../pages/HomePage"));
+const ArticlePage = lazy(() => import("../pages/ArticlePage"));
+const AuthPage = lazy(() => import("../pages/AuthPage"));
+const CategoryPage = lazy(() => import("../pages/CategoryPage"));
+const SearchPage = lazy(() => import("../pages/SearchPage"));
+const ProfilePage = lazy(() => import("../pages/ProfilePage"));
+const ResetPasswordPage = lazy(() => import("../pages/ResetPasswordPage"));
+const ForgotPasswordPage = lazy(() => import("../pages/ForgotPasswordPage"));
 
 const Router = () => {
     return (
@@ -43,10 +19,14 @@ const Router = () => {
             <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
                     {/* Tài khoản */}
-                    <Route path="/login" element={<AuthPage/>}/>
-                    <Route path="/register" element={<AuthPage/>}/>
+                    <Route element={<AuthLayout/>}>
+                        <Route path="/login" element={<AuthPage/>}/>
+                        <Route path="/register" element={<AuthPage/>}/>
+                        <Route path="/forgot-password" element={<ForgotPasswordPage/>}/>
+                        <Route path="/reset-password" element={<ResetPasswordPage/>}/>
+                    </Route>
 
-                    <Route path="/" element={<Layout/>}>
+                    <Route path="/" element={<MainLayout/>}>
                         {/* Trang chủ */}
                         <Route index element={<HomePage/>}/>
 

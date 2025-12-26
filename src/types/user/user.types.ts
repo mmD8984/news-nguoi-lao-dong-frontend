@@ -29,3 +29,23 @@ export interface RegisterFormData {
     password: string;
     confirmPassword: string;
 }
+
+export interface ResetPasswordFormData {
+    email: string;
+    newPassword: string;
+    confirmPassword: string;
+}
+
+export interface SendResetPasswordRequest {
+    email: string;
+    redirectUrl?: string;
+}
+
+export interface VerifyResetPasswordCodeRequest {
+    oobCode: string;
+}
+
+export interface ConfirmResetPasswordRequest {
+    oobCode: string;
+    newPassword: string;
+}

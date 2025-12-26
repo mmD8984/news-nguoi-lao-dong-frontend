@@ -2,52 +2,12 @@
   font-family: var(--font-primary);
 }
 
-/* Auth Page Header */
 .auth-page__header {
   background-color: var(--nld-auth);
 }
 
 .auth-page__logo img {
   height: 40px;
-}
-
-.auth-page__back-btn {
-  color: #fff;
-  text-decoration: none;
-  transition: opacity var(--transition-fast);
-}
-
-.auth-page__back-btn:hover {
-  opacity: 0.8;
-  color: #fff;
-}
-
-.auth-page__title {
-  letter-spacing: -1px;
-}
-
-/* Auth Page Content */
-.auth-page__content {
-  display: flex;
-  justify-content: center;
-}
-
-.auth-page__form-wrapper {
-  width: 100%;
-  max-width: 450px;
-}
-
-/* Auth Page Tabs */
-.auth-page__tabs {
-  border-bottom: none;
-}
-
-.auth-page__tabs .nav {
-  border-bottom: none;
-}
-
-.auth-page__tabs .nav-item {
-  flex: 1;
 }
 
 .auth-page__tabs .nav-link {
@@ -94,79 +54,4 @@
 
 .auth-page__tabs .nav-link:focus-visible {
   box-shadow: none;
-}
-
-/* Auth Page Form */
-.auth-page__form {
-  width: 100%;
-}
-
-.auth-page__forgot-link {
-  transition: color var(--transition-fast);
-}
-
-.auth-page__forgot-link:hover {
-  color: var(--nld-blue) !important;
-}
-
-.auth-page__submit-btn {
-  background-color: var(--nld-auth) !important;
-  transition: all var(--transition-fast);
-}
-
-.auth-page__submit-btn:hover {
-  background-color: var(--nld-nav-hover) !important;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-/* Auth Page Divider */
-.auth-page__divider {
-  position: relative;
-}
-
-.auth-page__divider-text {
-  background-color: #fff;
-  padding: 0 var(--spacing-2);
-}
-
-/* Auth Page Terms */
-.auth-page__terms a {
-  color: var(--nld-blue);
-  transition: color var(--transition-fast);
-}
-
-.auth-page__terms a:hover {
-  color: var(--nld-nav-hover);
-}
-
-/* Auth Page Social Buttons */
-.auth-page__social-buttons {
-  display: flex;
-  gap: var(--spacing-3);
-}
-
-.auth-page__social-btn {
-  transition: all var(--transition-fast);
-}
-
-.auth-page__social-btn:hover {
-  background-color: #f8f9fa !important;
-  border-color: var(--nld-blue) !important;
-  transform: translateY(-1px);
-}
-
-.auth-page__zalo-icon {
-  width: 20px;
-  height: 20px;
-  font-size: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.auth-page__social-icon {
-  width: 20px;
-  height: 20px;
-  display: block;
 }
