@@ -16,6 +16,16 @@ export interface Article {
     isHot: boolean;
 }
 
+// ✅ THÊM RSS Article type
+export interface ArticleRSS {
+    id: string;
+    title: string;
+    link: string;
+    description: string;
+    pubDate: string;
+    image: string;
+}
+
 export interface CategoryRegistry {
     slug: string;
     name: string;
