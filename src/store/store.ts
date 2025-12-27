@@ -10,7 +10,7 @@ import {
     REGISTER,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import userReducer from "./userSlice";
+import userReducer from "./user/user.slice.ts";
 import commentsReducer from "./commentsSlice";
 
 const rootReducer = combineReducers({

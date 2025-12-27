@@ -1,287 +1,369 @@
-import {useMemo, useState} from 'react';
-import {Link, useLocation, useNavigate} from 'react-router-dom';
-import {Button, Col, Container, Form, Row, Tab, Tabs} from 'react-bootstrap';
-import Footer from '../components/Footer';
-import {useAppDispatch} from '../store/hooks';
-import {setUser, type User} from '../store/userSlice';
-import {iconGoogle, iconZalo} from '../assets';
+import {useEffect, useState} from "react";
+import {type SubmitHandler, useForm} from "react-hook-form";
+import {Link, useLocation, useNavigate} from "react-router-dom";
+import {Button, Col, Container, Form, Row, Tab, Tabs} from "react-bootstrap";
+import {toast} from "react-toastify";
+import {BsEye, BsEyeSlash} from "react-icons/bs";
 
-// Tạo id user demo
-function generateAccountId() {
-    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
-    return `u-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
+import {useAppDispatch} from "@/store/hooks";
+import {iconGoogle} from "@/assets";
+import {googleLoginUser, loginUser, registerUser,} from "@/store/user/user.actions.ts";
+import type {LoginFormData, RegisterFormData} from "@/types/user/user.types";
+import {
+    confirmPasswordRequiredMessage,
+    loginEmailRules,
+    loginPasswordRules,
+    registerEmailRules,
+    registerFullNameRules,
+    registerPasswordRules,
+    validateConfirmPassword,
+} from "@/utils/formValidation";
 
 function AuthPage() {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
 
+    // Ẩn, hiện mật khẩu
+    const [showLoginPassword, setShowLoginPassword] = useState(false);
+    const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+    const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] =
+        useState(false);
+
     // Dựa theo route để set tab mặc định
-    const isRegisterPath = location.pathname === '/register';
-    const [activeTab, setActiveTab] = useState(isRegisterPath ? 'register' : 'login');
+    const isRegisterPath = location.pathname === "/register";
+    const activeTab = isRegisterPath ? "register" : "login";
 
-    // Form state (demo)
-    const [emailOrPhone, setEmailOrPhone] = useState('');
-    const [displayName, setDisplayName] = useState('');
-    const [gender, setGender] = useState<User['gender']>(null);
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    // Xử lý chuyển tab
+    const handleTabSelect = (k: string | null) => {
+        if (k === "register") navigate("/register");
+        else navigate("/login");
+    };
 
-    // Validate tối thiểu cho register
-    const canRegister = useMemo(
-        function () {
-            if (!emailOrPhone.trim())
-                return false;
+    // Trạng thái form ban đầu, sử dụng useForm để xử lý form
+    const {
+        register: registerLogin,
+        handleSubmit: handleLoginSubmit,
+        formState: {errors: loginErrors, isSubmitting: isLoginSubmitting},
+        reset: resetLogin,
+        watch: watchLogin,
+    } = useForm<LoginFormData>({mode: "onTouched"});
 
-            if (!displayName.trim())
-                return false;
+    const {
+        register: registerRegister,
+        handleSubmit: handleRegisterSubmit,
+        formState: {errors: registerErrors, isSubmitting: isRegisterSubmitting},
+        getValues: getRegisterValues,
+        reset: resetRegister,
+        watch: watchRegister,
+    } = useForm<RegisterFormData>({mode: "onTouched"});
 
-            if (!password)
-                return false;
+    // Theo dõi giá trị các trường
+    const loginPasswordValue = watchLogin("password");
+    const registerPasswordValue = watchRegister("password");
+    const registerConfirmValue = watchRegister("confirmPassword");
 
-            if (password !== confirmPassword)
-                return false;
+    // Reset form khi thay đổi route
+    useEffect(() => {
+        resetLogin();
+        resetRegister();
+    }, [location.pathname, resetLogin, resetRegister]);
 
-            return true;
-        },
-        [confirmPassword, displayName, emailOrPhone, password]
-    );
-
-    // User demo cho login (để test UI)
-    const loginUser: User = useMemo(
-        function () {
-            return {
-                id: 'u-001',
-                displayName: displayName.trim() || 'Sinh viên',
-                avatar: '',
-                emailOrPhone: emailOrPhone.trim() || 'sinhvien@st.hcmuaf.edu.vn',
-                gender: gender ?? null,
-                savedArticleIds: ['a-001', 'a-005']
-            };
-        },
-        [displayName, emailOrPhone, gender]
-    );
-
-    // Login
-    function handleLogin() {
-        dispatch(setUser(loginUser));
-        navigate('/profile');
-    }
-
-    // Register
-    function handleRegister() {
-        if (!canRegister) return;
-        const newUser: User = {
-            id: generateAccountId(),
-            displayName: displayName.trim(),
-            avatar: '',
-            emailOrPhone: emailOrPhone.trim(),
-            gender: gender,
-            savedArticleIds: []
+    // Đăng ký tài khoản với email và mật khẩu
+    const onRegisterSubmit: SubmitHandler<RegisterFormData> = async (data) => {
+        const payload = {
+            email: data.email,
+            password: data.password,
+            fullName: data.fullName,
         };
-        dispatch(setUser(newUser));
-        navigate('/profile');
-    }
+        try {
+            await dispatch(registerUser(payload)).unwrap();
+            toast.success("Đăng ký tài khoản thành công");
+            setTimeout(() => navigate("/"), 1000);
+        } catch (msg) {
+            toast.error(String(msg));
+        }
+    };
 
-    // Social login demo
-    function handleSocialLogin(provider: string) {
-        const socialUser: User = {
-            id: generateAccountId(),
-            displayName: `User ${provider}`,
-            avatar: '',
-            emailOrPhone: `${provider}@example.com`,
-            gender: null,
-            savedArticleIds: ['a-003']
-        };
-        dispatch(setUser(socialUser));
-        navigate('/profile');
-    }
+    // Đăng nhập tài khoản với email và mật khẩu
+    const onLoginSubmit: SubmitHandler<LoginFormData> = async (data) => {
+        try {
+            await dispatch(loginUser(data)).unwrap();
+            toast.success("Đăng nhập thành công");
+            setTimeout(() => navigate("/"), 1000);
+        } catch (msg) {
+            toast.error(String(msg));
+        }
+    };
 
-    function handleTabSelect(k: string | null) {
-        setActiveTab(k || 'login');
-    }
-
-    function handleGoogleClick() {
-        handleSocialLogin('google');
-    }
-
-    function handleZaloClick() {
-        handleSocialLogin('zalo');
+    // Đăng nhập với Google account
+    async function handleGoogleClick() {
+        try {
+            await dispatch(googleLoginUser()).unwrap();
+            toast.success("Đăng nhập Google thành công");
+            setTimeout(() => navigate("/"), 1000);
+        } catch (msg) {
+            toast.error(String(msg));
+        }
     }
 
     return (
-        <div className="auth-page min-vh-100 bg-white">
-            {/* Header Auth */}
-            <div className="auth-page__header bg-nld-auth py-3 shadow-sm">
-                <Container className="position-relative d-flex justify-content-center align-items-center">
-                    <Link to="/" className="text-decoration-none">
-                        <h1 className="auth-page__title h3 fw-bold text-white m-0 text-uppercase">NGƯỜI LAO ĐỘNG</h1>
-                    </Link>
-                </Container>
-            </div>
+        <Container className="py-5">
+            <Row className="justify-content-center">
+                <Col xs={12} md={8} lg={5}>
+                    {/* Tabs: login/register */}
+                    <Tabs
+                        activeKey={activeTab}
+                        onSelect={handleTabSelect}
+                        className="mb-4"
+                        justify
+                    >
+                        <Tab eventKey="login" title="Đăng nhập">
+                            {/* Form login */}
+                            <Form
+                                className="mt-4"
+                                onSubmit={handleLoginSubmit(onLoginSubmit)}
+                            >
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="fw-bold small">Email</Form.Label>
+                                    <Form.Control
+                                        type="email"
+                                        placeholder="Nhập Email"
+                                        isInvalid={!!loginErrors.email}
+                                        {...registerLogin("email", loginEmailRules)}
+                                        className="py-2"
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        {loginErrors.email?.message}
+                                    </Form.Control.Feedback>
+                                </Form.Group>
 
-            {/* Content */}
-            <Container className="py-5">
-                <Row className="justify-content-center">
-                    <Col xs={12} md={8} lg={5}>
-                        {/* Tabs: login/register */}
-                        <Tabs activeKey={activeTab} onSelect={handleTabSelect} className="mb-4">
-                            <Tab eventKey="login" title={<span className="fw-bold text-dark">Đăng nhập</span>}>
-                                {/* Form login */}
-                                <Form className="mt-4" onSubmit={(e) => e.preventDefault()}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold small">Email / Số điện thoại</Form.Label>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="fw-bold small">Mật khẩu</Form.Label>
+                                    <div className="position-relative">
                                         <Form.Control
-                                            type="text"
-                                            placeholder="Nhập Email / Số điện thoại"
-                                            value={emailOrPhone}
-                                            onChange={(e) => setEmailOrPhone(e.target.value)}
-                                            className="py-2"
-                                        />
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold small">Mật khẩu</Form.Label>
-                                        <Form.Control
-                                            type="password"
+                                            type={showLoginPassword ? "text" : "password"}
                                             placeholder="Nhập mật khẩu"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            className="py-2"
+                                            isInvalid={!!loginErrors.password}
+                                            {...registerLogin("password", loginPasswordRules)}
+                                            className="py-2 pe-5"
                                         />
-                                    </Form.Group>
-
-                                    <div className="d-flex justify-content-end mb-4">
-                                        <a href="#" className="small text-muted text-decoration-none">
-                                            Quên mật khẩu?
-                                        </a>
-                                    </div>
-
-                                    <Button onClick={handleLogin}
-                                            className="w-100 bg-nld-auth border-0 py-2 fw-bold mb-4" size="lg">
-                                        Tiếp tục
-                                    </Button>
-                                </Form>
-                            </Tab>
-
-                            <Tab eventKey="register" title={<span className="fw-bold text-dark">Đăng ký</span>}>
-                                {/* Form register */}
-                                <Form className="mt-4" onSubmit={(e) => e.preventDefault()}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold small">Tên hiển thị</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Nhập tên hiển thị"
-                                            value={displayName}
-                                            onChange={(e) => setDisplayName(e.target.value)}
-                                            className="py-2"
-                                        />
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold small">Email / Số điện thoại</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Nhập Email / Số điện thoại"
-                                            value={emailOrPhone}
-                                            onChange={(e) => setEmailOrPhone(e.target.value)}
-                                            className="py-2"
-                                        />
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold small">Giới tính (tuỳ chọn)</Form.Label>
-                                        <Form.Select value={gender ?? ''}
-                                                     onChange={(e) => setGender((e.target.value as any) || null)}>
-                                            <option value="">Chưa chọn</option>
-                                            <option value="male">Nam</option>
-                                            <option value="female">Nữ</option>
-                                            <option value="other">Khác</option>
-                                        </Form.Select>
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold small">Mật khẩu</Form.Label>
-                                        <Form.Control
-                                            type="password"
-                                            placeholder="Nhập mật khẩu"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            className="py-2"
-                                        />
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-4">
-                                        <Form.Label className="fw-bold small">Xác nhận mật khẩu</Form.Label>
-                                        <Form.Control
-                                            type="password"
-                                            placeholder="Nhập lại mật khẩu"
-                                            value={confirmPassword}
-                                            onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className="py-2"
-                                        />
-                                        {confirmPassword && password !== confirmPassword && (
-                                            <div className="text-danger small mt-2">Mật khẩu xác nhận không khớp.</div>
+                                        {loginPasswordValue && (
+                                            <Button
+                                                variant="link"
+                                                type="button"
+                                                tabIndex={-1}
+                                                onClick={() => setShowLoginPassword((v) => !v)}
+                                                aria-label={
+                                                    showLoginPassword
+                                                        ? "Ẩn mật khẩu"
+                                                        : "Hiển thị mật khẩu"
+                                                }
+                                                className="position-absolute end-0 top-50 translate-middle-y text-muted px-3"
+                                            >
+                                                {showLoginPassword ? (
+                                                    <BsEyeSlash size={18}/>
+                                                ) : (
+                                                    <BsEye size={18}/>
+                                                )}
+                                            </Button>
                                         )}
-                                    </Form.Group>
+                                    </div>
+                                    {loginErrors.password?.message && (
+                                        <div className="invalid-feedback d-block">
+                                            {loginErrors.password.message}
+                                        </div>
+                                    )}
+                                </Form.Group>
 
-                                    <Button
-                                        onClick={handleRegister}
-                                        className="w-100 bg-nld-auth border-0 py-2 fw-bold mb-4"
-                                        size="lg"
-                                        disabled={!canRegister}
+                                <div className="d-flex justify-content-end mb-4">
+                                    <Link
+                                        to="/forgot-password"
+                                        className="small text-muted text-decoration-none"
                                     >
-                                        Đăng ký
-                                    </Button>
-                                </Form>
-                            </Tab>
-                        </Tabs>
+                                        Quên mật khẩu?
+                                    </Link>
+                                </div>
 
-                        {/* Divider */}
-                        <div className="position-relative mb-4 text-center">
-                            <hr/>
-                            <span className="bg-white px-2 text-muted small
-                            position-absolute top-50 start-50 translate-middle">
-                                Hoặc đăng nhập với
-                            </span>
-                        </div>
+                                <Button
+                                    type="submit"
+                                    className="w-100 bg-nld-auth border-0 py-2 fw-bold mb-4"
+                                    size="lg"
+                                    disabled={isLoginSubmitting}
+                                >
+                                    Tiếp tục
+                                </Button>
+                            </Form>
+                        </Tab>
 
-                        <p className="small text-muted text-center mb-4">
-                            Khi nhấn tiếp tục, bạn đồng ý với{' '}
-                            <a href="#" className="text-decoration-underline">
-                                điều khoản sử dụng
-                            </a>
-                            .
-                        </p>
-
-                        {/* Social buttons */}
-                        <div className="d-flex gap-3">
-                            <Button
-                                variant="outline-light"
-                                className="w-50 border text-dark d-flex align-items-center justify-content-center gap-2 py-2"
-                                onClick={handleGoogleClick}
+                        <Tab eventKey="register" title="Đăng ký tài khoản">
+                            {/* Form register */}
+                            <Form
+                                className="mt-4"
+                                onSubmit={handleRegisterSubmit(onRegisterSubmit)}
                             >
-                                <img src={iconGoogle} alt="Google" className="auth-page__social-icon"/>
-                                <span className="small fw-bold">Google</span>
-                            </Button>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="fw-bold small">Họ và tên</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Nhập họ và tên"
+                                        isInvalid={!!registerErrors.fullName}
+                                        {...registerRegister("fullName", registerFullNameRules)}
+                                        className="py-2"
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        {registerErrors.fullName?.message}
+                                    </Form.Control.Feedback>
+                                </Form.Group>
 
-                            <Button
-                                variant="outline-light"
-                                className="w-50 border text-dark d-flex align-items-center justify-content-center gap-2 py-2"
-                                onClick={handleZaloClick}
-                            >
-                                <img src={iconZalo} alt="Zalo" className="auth-page__social-icon"/>
-                                <span className="small fw-bold">Zalo</span>
-                            </Button>
-                        </div>
-                    </Col>
-                </Row>
-            </Container>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="fw-bold small">Email</Form.Label>
+                                    <Form.Control
+                                        type="email"
+                                        placeholder="Nhập Email"
+                                        isInvalid={!!registerErrors.email}
+                                        {...registerRegister("email", registerEmailRules)}
+                                        className="py-2"
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        {registerErrors.email?.message}
+                                    </Form.Control.Feedback>
+                                </Form.Group>
 
-            {/* Footer */}
-            <Footer/>
-        </div>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="fw-bold small">Mật khẩu</Form.Label>
+                                    <div className="position-relative">
+                                        <Form.Control
+                                            type={showRegisterPassword ? "text" : "password"}
+                                            placeholder="Nhập mật khẩu"
+                                            isInvalid={!!registerErrors.password}
+                                            {...registerRegister("password", registerPasswordRules)}
+                                            className="py-2 pe-5"
+                                        />
+                                        {registerPasswordValue && (
+                                            <Button
+                                                variant="link"
+                                                type="button"
+                                                tabIndex={-1}
+                                                onClick={() => setShowRegisterPassword((v) => !v)}
+                                                aria-label={
+                                                    showRegisterPassword
+                                                        ? "Ẩn mật khẩu"
+                                                        : "Hiển thị mật khẩu"
+                                                }
+                                                className="position-absolute end-0 top-50 translate-middle-y text-muted px-3"
+                                            >
+                                                {showRegisterPassword ? (
+                                                    <BsEyeSlash size={18}/>
+                                                ) : (
+                                                    <BsEye size={18}/>
+                                                )}
+                                            </Button>
+                                        )}
+                                    </div>
+                                    {registerErrors.password?.message && (
+                                        <div className="invalid-feedback d-block">
+                                            {registerErrors.password.message}
+                                        </div>
+                                    )}
+                                </Form.Group>
+
+                                <Form.Group className="mb-4">
+                                    <Form.Label className="fw-bold small">
+                                        Xác nhận mật khẩu
+                                    </Form.Label>
+                                    <div className="position-relative">
+                                        <Form.Control
+                                            type={showRegisterConfirmPassword ? "text" : "password"}
+                                            placeholder="Nhập lại mật khẩu"
+                                            isInvalid={!!registerErrors.confirmPassword}
+                                            {...registerRegister("confirmPassword", {
+                                                required: confirmPasswordRequiredMessage,
+                                                validate: (value) =>
+                                                    validateConfirmPassword(
+                                                        value,
+                                                        getRegisterValues("password")
+                                                    ),
+                                            })}
+                                            className="py-2 pe-5"
+                                        />
+                                        {registerConfirmValue && (
+                                            <Button
+                                                variant="link"
+                                                type="button"
+                                                tabIndex={-1}
+                                                onClick={() =>
+                                                    setShowRegisterConfirmPassword((v) => !v)
+                                                }
+                                                aria-label={
+                                                    showRegisterConfirmPassword
+                                                        ? "Ẩn mật khẩu"
+                                                        : "Hiển thị mật khẩu"
+                                                }
+                                                className="position-absolute end-0 top-50 translate-middle-y text-muted px-3"
+                                            >
+                                                {showRegisterConfirmPassword ? (
+                                                    <BsEyeSlash size={18}/>
+                                                ) : (
+                                                    <BsEye size={18}/>
+                                                )}
+                                            </Button>
+                                        )}
+                                    </div>
+                                    {registerErrors.confirmPassword?.message && (
+                                        <div className="invalid-feedback d-block">
+                                            {registerErrors.confirmPassword.message}
+                                        </div>
+                                    )}
+                                </Form.Group>
+
+                                <Button
+                                    type="submit"
+                                    className="w-100 bg-nld-auth border-0 py-2 fw-bold mb-4"
+                                    size="lg"
+                                    disabled={isRegisterSubmitting}
+                                >
+                                    Đăng ký
+                                </Button>
+                            </Form>
+                        </Tab>
+                    </Tabs>
+
+                    {/* Divider */}
+                    <div className="position-relative mb-4 text-center">
+                        <hr/>
+                        <span
+                            className="bg-white px-2 text-muted small position-absolute top-50 start-50 translate-middle">
+              Hoặc đăng nhập với
+            </span>
+                    </div>
+
+                    <p className="small text-muted text-center mb-4">
+                        Khi nhấn tiếp tục, bạn đồng ý với{" "}
+                        <a href="#" className="text-decoration-underline">
+                            điều khoản sử dụng
+                        </a>
+                        .
+                    </p>
+
+                    {/* Social buttons */}
+                    <div className="d-flex gap-3">
+                        <Button
+                            variant="outline-light"
+                            className="w-100 border text-dark d-flex align-items-center justify-content-center gap-2 py-2"
+                            onClick={handleGoogleClick}
+                        >
+                            <img
+                                src={iconGoogle}
+                                alt="Google"
+                                style={{width: "20px", height: "20px"}}
+                            />
+                            <span className="small fw-bold">Google</span>
+                        </Button>
+                    </div>
+                </Col>
+            </Row>
+        </Container>
     );
 }
 

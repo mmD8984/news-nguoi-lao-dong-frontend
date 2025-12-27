@@ -16,12 +16,14 @@ import {
     BsSearch,
     BsXLg
 } from 'react-icons/bs';
-import {getCategories} from '../services/api';
-import type {MegaMenuData} from '../data/menu/megamenu';
-import type {NavItem} from '../types';
-import {useAppDispatch, useAppSelector} from '../store/hooks';
-import {clearUser} from '../store/userSlice';
-import {logoNld} from '../assets';
+
+import {useAppDispatch, useAppSelector} from '@/store/hooks';
+import {getCategories} from '@/services/api';
+import type {MegaMenuData} from '@/data/menu';
+import type {NavItem} from '@/types';
+import {logoutUser} from '@/store/user/user.actions.ts';
+import {getCurrentUser} from "@/store/user/user.selectors.ts";
+import {logoNld} from '@/assets';
 
 dayjs.locale('vi');
 
@@ -45,7 +47,7 @@ function Header() {
     const [categories, setCategories] = useState<NavItem[]>([]);
 
     const dispatch = useAppDispatch();
-    const user = useAppSelector((state) => state.user.currentUser);
+    const user = useAppSelector(getCurrentUser);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -138,7 +140,7 @@ function Header() {
 
     // Logout: clear redux + về Home
     const handleLogout = () => {
-        dispatch(clearUser());
+        dispatch(logoutUser());
         setShowUserMenu(false);
         navigate('/');
     };

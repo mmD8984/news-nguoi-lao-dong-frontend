@@ -5,7 +5,8 @@ import {BsBookmark, BsBoxArrowRight, BsPerson, BsPersonCircle} from 'react-icons
 import NewsCard from '../components/NewsCard';
 import {getUserSavedArticles} from '../services/api';
 import {useAppDispatch, useAppSelector} from '../store/hooks';
-import {clearUser, updateProfile} from '../store/userSlice';
+import {updateProfile} from '../store/user/user.slice.ts';
+import {logoutUser} from '../store/user/user.actions.ts';
 import type {Article} from '../types';
 import {ViewMode} from '../types';
 
@@ -119,7 +120,7 @@ function ProfilePage() {
                                     action
                                     className="profile-nav__item text-danger"
                                     onClick={() => {
-                                        dispatch(clearUser());
+                                        dispatch(logoutUser());
                                         navigate('/');
                                     }}
                                 >

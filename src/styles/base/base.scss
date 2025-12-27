@@ -1,0 +1,40 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-primary);
+    color: var(--nld-text);
+    background-color: #fff;
+    font-size: var(--fs-md);
+    line-height: var(--lh-normal);
+    margin: 0;
+    padding: 0;
+}
+
+/* Buttons (Bootstrap overrides) */
+.btn {
+    min-height: 48px;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-secondary);
+    margin: 0;
+}
+
+/* Link Styling */
+a {
+    text-decoration: none !important;
+    color: inherit;
+    transition: color var(--transition-fast);
+}
