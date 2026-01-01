@@ -2,7 +2,7 @@ import { RSS_FEEDS, type RssKey } from "../../data/rss";
 import type { Article } from "../../types";
 import { mapRSSToArticle } from "./rssMapper";
 
-const RSS2JSON = "https://api.rss2json.com/v1/api.json?rss_url=";
+const RSS2JSON = "https://api.rss2json.com/v1/api.json?api_key=9jmfqcnavewhnaxehmqwju6uwtm87rb2szx9jij5&rss_url=";
 
 export async function fetchCategoryRSS(
     slug: RssKey

@@ -27,25 +27,25 @@ function CategoryPage() {
         setLoading(true);
 
         async function load() {
-            // Load menu
             const nav = await getCategories();
             setCategories(nav);
 
-            if (!category) {
+            const key = (subCategory || category) as RssKey;
+            if (!key) {
                 setArticles([]);
                 setAllArticles([]);
                 return;
             }
 
-            // Fetch RSS theo category slug
-            const rssArticles = await fetchCategoryRSS(category as RssKey);
+            const rssArticles = await fetchCategoryRSS(key);
 
             setArticles(rssArticles);
-            setAllArticles(rssArticles); // RSS hiện tại chỉ theo 1 category
+            setAllArticles(rssArticles);
         }
 
         load().finally(() => setLoading(false));
     }, [category, subCategory]);
+
 
     const currentCategoryPath = category ? `/${category}` : "";
     const currentCategory = categories.find(
@@ -142,13 +142,54 @@ function CategoryPage() {
                         <div className="mb-4 pb-4 border-bottom">
                             {heroArticle && (
                                 <div className="mb-4">
-                                    <NewsCard
-                                        article={heroArticle}
-                                        mode={ViewMode.CATEGORY_HERO}
-                                        showCategory={false}
-                                    />
+                                    <Row className="g-4 align-items-stretch">
+                                        {/* ===== Image (70%) ===== */}
+                                        <Col lg={8} md={7}>
+                                            <Link
+                                                to={`/article/${heroArticle.id}`}
+                                                className="d-block h-100 overflow-hidden rounded-2"
+                                            >
+                                                <img
+                                                    src={heroArticle.coverImage || heroArticle.thumbnail}
+                                                    alt={heroArticle.title}
+                                                    className="w-100 h-100 object-fit-cover"
+                                                    style={{ minHeight: 320 }}
+                                                />
+                                            </Link>
+                                        </Col>
+
+                                        {/* ===== Content (30%) ===== */}
+                                        <Col lg={4} md={5}>
+                                            <div className="d-flex flex-column h-100">
+                                                <Link
+                                                    to={`/article/${heroArticle.id}`}
+                                                    className="text-decoration-none"
+                                                >
+                                                    <h2 className="fw-bold text-dark hover-link mb-3">
+                                                        {heroArticle.title}
+                                                    </h2>
+                                                </Link>
+
+                                                {heroArticle.description && (
+                                                    <p className="text-secondary fs-6">
+                                                        {heroArticle.description}
+                                                    </p>
+                                                )}
+
+                                                <div className="mt-auto">
+                                                    <Link
+                                                        to={`/article/${heroArticle.id}`}
+                                                        className="fw-bold text-nld-red text-decoration-none"
+                                                    >
+                                                        Đọc tiếp →
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        </Col>
+                                    </Row>
                                 </div>
                             )}
+
 
                             <Row className="g-4">
                                 {subHeroArticles.map((art, idx) => (

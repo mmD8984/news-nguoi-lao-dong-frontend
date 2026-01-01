@@ -64,7 +64,7 @@ export const CATEGORIES: NavItem[] = [
       { label: "Ôtô - Xe - Điện máy", path: "/kinh-te/oto-xe-dien-may" },
       { label: "Bất động sản", path: "/kinh-te/bat-dong-san" },
       { label: "Tài chính – Chứng khoán", path: "/kinh-te/tai-chinh-chung-khoan" },
-      { label: "Diễn đàn kinh tế", path: "/kinh-te/tai-chinh-chung-khoan" },
+      { label: "Diễn đàn kinh tế", path: "/kinh-te/dien-dan-kinh-te" },
     ],
   },
 
@@ -79,7 +79,7 @@ export const CATEGORIES: NavItem[] = [
   },
 
   {label: "Giáo dục",
-    path: "/giao-duc",
+    path: "/giao-duc-khoa-hoc",
     subItems: [
       { label: "Du học", path: "/giao-duc-khoa-hoc/du-hoc" },
       { label: "Tuyển sinh", path: "/giao-duc-khoa-hoc/tuyen-sinh" },
