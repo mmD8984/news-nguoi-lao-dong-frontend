@@ -2,8 +2,8 @@ import { Link, Outlet } from "react-router-dom";
 import { Container } from "react-bootstrap";
 import { ToastContainer } from "react-toastify";
 
-import Footer from "../components/Footer";
-import ScrollToTop from "../components/ScrollToTop";
+import Footer from "../components/layout/Footer.tsx";
+import ScrollToTop from "../components/common/ScrollToTop.tsx";
 import { logoNldDark } from "../assets";
 
 function AuthLayout() {

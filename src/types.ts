@@ -14,6 +14,17 @@ export interface Article {
     tags: string[];
     isFeatured: boolean;
     isHot: boolean;
+    link?: string;
+}
+
+// ✅ THÊM RSS Article type
+export interface ArticleRSS {
+    id: string;
+    title: string;
+    link: string;
+    description: string;
+    pubDate: string;
+    image: string;
 }
 
 export interface CategoryRegistry {

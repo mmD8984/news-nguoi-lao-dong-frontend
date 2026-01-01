@@ -42,8 +42,8 @@ const Router = () => {
                         {/* Trang danh mục
                           - /quoc-te
                           - /quoc-te/nguoi-viet-do-day */}
-                        <Route path=":category/:subCategory" element={<CategoryPage/>}/>
                         <Route path=":category" element={<CategoryPage/>}/>
+                        <Route path=":category/:subCategory" element={<CategoryPage/>}/>
                     </Route>
                 </Routes>
             </Suspense>

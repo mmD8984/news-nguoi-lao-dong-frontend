@@ -1,178 +1,216 @@
-import {useEffect, useState} from 'react';
-import {Col, Container, Row} from 'react-bootstrap';
-import {Link} from 'react-router-dom';
-import NewsCard from '../components/NewsCard';
-import TrendingBar from '../components/TrendingBar';
-import {getArticles, getHomepageData} from '../services/api';
-import type {Article} from '../types';
-import {ViewMode} from '../types';
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { Container, Row, Col, Alert, Button, Spinner } from "react-bootstrap";
+import NewsCard from "../components/NewsCard";
+import TrendingBar from "../components/TrendingBar";
+import { RSS_FEEDS } from "../data/rss";
+import { ViewMode } from "../types";
 
-function HomePage() {
-    const [allArticles, setAllArticles] = useState<Article[]>([]);
-    const [hero, setHero] = useState<Article[]>([]);
-    const [hot, setHot] = useState<Article[]>([]);
-    const [sidebarHot, setSidebarHot] = useState<Article[]>([]);
+interface ArticleRSS {
+    id: string;
+    title: string;
+    link: string;
+    description: string;
+    pubDate: string;
+    image: string;
+}
+
+const RSS_URL = RSS_FEEDS.home;
+const RSS2JSON_URL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(
+    RSS_URL
+)}`;
+
+const HomePage: React.FC = () => {
+    const [articles, setArticles] = useState<ArticleRSS[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [lastUpdated, setLastUpdated] = useState("");
 
-    // Lấy data cho trang Home
-    useEffect(function () {
-        setLoading(true);
+    const retryTimer = useRef<any>(null);
 
-        async function load() {
-            const homepage = await getHomepageData();
-            const all = await getArticles();
-            setHero(homepage.hero);
-            setHot(homepage.hot);
-            setSidebarHot(homepage.sidebarHot);
-            setAllArticles(all);
-        }
+    /* ===== Helpers ===== */
+    const cleanText = (html: string, maxLength = 150) => {
+        const text = html.replace(/<[^>]+>/g, "").trim();
+        return text.length > maxLength
+            ? text.slice(0, maxLength) + "..."
+            : text;
+    };
 
-        load().finally(function () {
+    const extractImage = (html: string) => {
+        const match = html.match(/<img[^>]+src="([^">]+)"/i);
+        return match ? match[1] : null;
+    };
+
+    /* ===== Fetch RSS ===== */
+    const fetchRSS = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const res = await fetch(RSS2JSON_URL);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+
+            const items: ArticleRSS[] = (data.items || []).map(
+                (item: any, idx: number) => {
+                    const html = item.content || item.description || "";
+                    return {
+                        id: item.guid || item.link || `rss-${idx}`,
+                        title: item.title,
+                        link: item.link,
+                        description: cleanText(html),
+                        pubDate: item.pubDate,
+                        image:
+                            item.thumbnail ||
+                            item.enclosure?.link ||
+                            extractImage(html) ||
+                            "https://via.placeholder.com/300x200?text=NLĐ",
+                    };
+                }
+            );
+
+            setArticles(items);
+            setLastUpdated(new Date().toLocaleString("vi-VN"));
+        } catch (err: any) {
+            setError(`Lỗi tải tin: ${err.message}`);
+            retryTimer.current = setTimeout(fetchRSS, 30000);
+        } finally {
             setLoading(false);
-        });
+        }
     }, []);
 
-    // Chuẩn bị data để chia block
-    const focusMain: Article | undefined = hero[0] ?? allArticles[0];
+    useEffect(() => {
+        fetchRSS();
+        const interval = setInterval(fetchRSS, 5 * 60 * 1000);
+        return () => clearInterval(interval);
+    }, [fetchRSS]);
 
-    const focusSub: Article[] = [];
-    if (hero[1])
-        focusSub.push(hero[1]);
-    if (hot[0])
-        focusSub.push(hot[0]);
-
-    const focusBottom: Article[] = hot.slice(1, 4);
-
-    // Gom các bài đã có ở phần trên, để phần list dưới không bị trùng.
-    const usedIds = new Set<string>();
-    if (focusMain?.id)
-        usedIds.add(focusMain.id);
-    for (const a of focusSub)
-        usedIds.add(a.id);
-    for (const a of focusBottom)
-        usedIds.add(a.id);
-
-    const streamArticles: Article[] = [];
-    for (const a of allArticles) {
-        if (usedIds.has(a.id))
-            continue;
-
-        streamArticles.push(a);
-
-        if (streamArticles.length >= 3)
-            break;
-    }
-
-    const mostViewed = sidebarHot;
-
-    if (loading && allArticles.length === 0) {
+    if (loading && articles.length === 0) {
         return (
-            <div className="font-sans bg-white">
-                <Container className="py-4">
-                    <div className="text-secondary">Loading...</div>
-                </Container>
-            </div>
+            <Container className="py-5 text-center">
+                <Spinner animation="border" />
+            </Container>
         );
     }
 
+    if (error && articles.length === 0) {
+        return (
+            <Container className="py-4">
+                <Alert variant="warning">
+                    <h5>⚠️ Không thể tải dữ liệu</h5>
+                    <p>{error}</p>
+                    <Button onClick={fetchRSS}>Thử lại</Button>
+                </Alert>
+            </Container>
+        );
+    }
+
+    /* ===== Layout NLĐ ===== */
+    const heroMain = articles[0];
+    const heroSide = articles.slice(1, 3);
+    const heroBottom = articles.slice(3, 6);
+    const hotNews = articles.slice(0, 10);
+    const listNews = articles.slice(6, 15);
+    const mostViewed = articles.slice(0, 5);
+
     return (
         <div className="font-sans bg-white">
-            <Container className="py-4">
+            <Container className="py-3">
+                {/* ===== HERO ===== */}
                 <Row className="g-4 mb-4">
                     <Col lg={9}>
                         <Row className="g-4">
-                            {/* Bài chính */}
                             <Col lg={8}>
-                                {focusMain &&
-                                    <NewsCard article={focusMain} mode={ViewMode.HERO_TOP_TITLE} showCategory={false}/>}
+                                {heroMain && (
+                                    <NewsCard
+                                        article={heroMain}
+                                        mode={ViewMode.HERO_TOP_TITLE}
+                                        showCategory={false}
+                                    />
+                                )}
                             </Col>
-
-                            {/* Bài phụ bên phải */}
                             <Col lg={4}>
                                 <div className="d-flex flex-column gap-4">
-                                    {focusSub.map(function (sub) {
-                                        return <NewsCard key={sub.id} article={sub} mode={ViewMode.FOCUS_SUB}
-                                                         showCategory={false}/>;
-                                    })}
+                                    {heroSide.map(a => (
+                                        <NewsCard
+                                            key={a.id}
+                                            article={a}
+                                            mode={ViewMode.FOCUS_SUB}
+                                            showCategory={false}
+                                        />
+                                    ))}
                                 </div>
                             </Col>
                         </Row>
 
-                        {/* 3 bài nhỏ phía dưới */}
-                        <div className="border-top mt-4 pt-4">
-                            <Row className="g-4">
-                                {focusBottom.map(function (article, idx) {
-                                    return (
-                                        <Col md={4} key={article.id} className={idx !== 2 ? 'border-end' : ''}>
-                                            <NewsCard article={article} mode={ViewMode.FOCUS_BOTTOM}
-                                                      showCategory={false}/>
-                                        </Col>
-                                    );
-                                })}
-                            </Row>
-                        </div>
+                        <Row className="g-4 mt-2 border-top pt-3">
+                            {heroBottom.map(a => (
+                                <Col md={4} key={a.id}>
+                                    <NewsCard
+                                        article={a}
+                                        mode={ViewMode.FOCUS_BOTTOM}
+                                        showCategory={false}
+                                    />
+                                </Col>
+                            ))}
+                        </Row>
                     </Col>
 
-                    {/* Sidebar: Tin nóng */}
+                    {/* ===== TIN NÓNG ===== */}
                     <Col lg={3} className="border-start ps-lg-3">
-                        <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h3 className="fw-bold h5 text-dark text-uppercase font-serif m-0">TIN NÓNG</h3>
-                        </div>
-
-                        <div className="overflow-auto pe-1 custom-scrollbar home-hot-scroll">
-                            {hot.map(function (t, idx) {
-                                const itemClass = `py-2 ${idx !== hot.length - 1 ? 'border-bottom' : ''} border-light`;
-                                return (
-                                    <div key={t.id} className={itemClass}>
-                                        <NewsCard article={t} mode={ViewMode.TEXT_ONLY} showCategory={false}/>
-                                    </div>
-                                );
-                            })}
+                        <h3 className="sidebar-header-custom">Tin nóng</h3>
+                        <div className="home-hot-scroll custom-scrollbar overflow-auto">
+                            {hotNews.map(a => (
+                                <div key={a.id} className="py-2 border-bottom">
+                                    <NewsCard
+                                        article={a}
+                                        mode={ViewMode.TEXT_ONLY}
+                                        showCategory={false}
+                                    />
+                                </div>
+                            ))}
                         </div>
                     </Col>
                 </Row>
 
-                {/* Trending */}
-                <TrendingBar/>
+                {/* ===== TRENDING ===== */}
+                <TrendingBar />
 
-                {/* Danh sách bài (list) + sidebar Tin đọc nhiều */}
+                {/* ===== LIST + SIDEBAR ===== */}
                 <Row className="g-4">
                     <Col lg={8} className="border-end-lg-custom pe-lg-4">
-                        {streamArticles.map(function (article) {
-                            return (
-                                <div key={article.id} className="mb-4 pb-4 border-bottom border-light">
-                                    <NewsCard article={article} mode={ViewMode.LIST}/>
-                                </div>
-                            );
-                        })}
-                        <div className="text-center mt-5 mb-5">
-                            <button
-                                className="btn btn-light border fw-bold text-secondary px-5 rounded-pill hover-shadow">Xem
-                                thêm
-                            </button>
-                        </div>
+                        {listNews.map(a => (
+                            <div key={a.id} className="mb-4 pb-4 border-bottom">
+                                <NewsCard article={a} mode={ViewMode.LIST} />
+                            </div>
+                        ))}
                     </Col>
 
-                    {/* Sidebar: Tin đọc nhiều */}
                     <Col lg={4} className="ps-lg-4">
-                        <div className="mb-5 sidebar-box">
+                        <div className="sidebar-box">
                             <h5 className="sidebar-header-custom">
-                                <Link to="#" className="text-decoration-none">
-                                    Tin đọc nhiều
-                                </Link>
+                                Tin đọc nhiều
                             </h5>
                             <div className="d-flex flex-column gap-3">
-                                {mostViewed.map(function (art) {
-                                    return <NewsCard key={art.id} article={art} mode={ViewMode.SIDEBAR_SMALL}
-                                                     showCategory={false}/>;
-                                })}
+                                {mostViewed.map(a => (
+                                    <NewsCard
+                                        key={a.id}
+                                        article={a}
+                                        mode={ViewMode.SIDEBAR_SMALL}
+                                        showCategory={false}
+                                    />
+                                ))}
                             </div>
                         </div>
                     </Col>
                 </Row>
+
+                <div className="text-muted small mt-4">
+                    Cập nhật: {lastUpdated}
+                </div>
             </Container>
         </div>
     );
-}
+};
 
 export default HomePage;
