@@ -2,9 +2,10 @@ import {useEffect, useState} from "react";
 import {BsFacebook, BsRss, BsYoutube} from "react-icons/bs";
 import {Link} from "react-router-dom";
 import {Container, Row, Col} from "react-bootstrap";
-import {getCategories} from "../services/api";
-import type {NavItem} from "../types";
-import {iconAppStore, iconGooglePlay} from '../assets';
+import {getCategories} from "../../services/api.ts";
+import type {NavItem} from "../../types.ts";
+import {iconAppStore, iconGooglePlay} from '../../assets';
+import {logoNld} from '@/assets';
 
 function Footer() {
     const [categories, setCategories] = useState<NavItem[]>([]);
@@ -18,9 +19,7 @@ function Footer() {
             <Container>
                 <div className="pb-3 mb-4 border-bottom">
                     <Link to="/" className="text-decoration-none">
-                        <h2 className="text-nld-red fw-black text-uppercase m-0 footer__title">
-                            NGƯỜI LAO ĐỘNG
-                        </h2>
+                        <img src={logoNld} className="logo-img" alt="Báo Người Lao Động"/>
                     </Link>
 
                     <div className="d-flex flex-wrap gap-3 mt-3 text-secondary footer__links">

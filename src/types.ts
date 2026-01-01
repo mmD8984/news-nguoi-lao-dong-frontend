@@ -14,6 +14,7 @@ export interface Article {
     tags: string[];
     isFeatured: boolean;
     isHot: boolean;
+    link?: string;
 }
 
 // ✅ THÊM RSS Article type

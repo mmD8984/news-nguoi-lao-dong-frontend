@@ -1,9 +1,9 @@
 import { Outlet } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import ScrollToTop from "../components/ScrollToTop";
+import Footer from "../components/layout/Footer.tsx";
+import Header from "../components/layout/Header.tsx";
+import ScrollToTop from "../components/common/ScrollToTop.tsx";
 
 function MainLayout() {
   return (

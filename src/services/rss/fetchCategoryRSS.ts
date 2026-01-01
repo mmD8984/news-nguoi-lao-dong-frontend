@@ -1,0 +1,20 @@
+import { RSS_FEEDS, type RssKey } from "../../data/rss";
+import type { Article } from "../../types";
+import { mapRSSToArticle } from "./rssMapper";
+
+const RSS2JSON = "https://api.rss2json.com/v1/api.json?rss_url=";
+
+export async function fetchCategoryRSS(
+    slug: RssKey
+): Promise<Article[]> {
+
+    const rssUrl = RSS_FEEDS[slug];
+    if (!rssUrl) return [];
+
+    const res = await fetch(RSS2JSON + encodeURIComponent(rssUrl));
+    const data = await res.json();
+
+    return (data.items ?? []).map((item: any, index: number) =>
+        mapRSSToArticle(item, slug, index)
+    );
+}
