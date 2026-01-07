@@ -1,14 +1,16 @@
-import {useEffect, useMemo, useState, type ChangeEvent} from 'react';
+import {type ChangeEvent, useEffect, useMemo, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {Alert, Button, Card, Col, Container, Form, ListGroup, Row} from 'react-bootstrap';
 import {BsBookmark, BsBoxArrowRight, BsPerson, BsPersonCircle} from 'react-icons/bs';
-import NewsCard from '../components/NewsCard';
-import {getUserSavedArticles} from '../services/api';
-import {useAppDispatch, useAppSelector} from '../store/hooks';
-import {updateProfile} from '../store/user/user.slice.ts';
-import {logoutUser} from '../store/user/user.actions.ts';
-import type {Article} from '../types';
-import {ViewMode} from '../types';
+
+import NewsCard from '@/components/NewsCard';
+import {getUserSavedArticles} from '@/services/api';
+import {useAppDispatch, useAppSelector} from '@/store/hooks';
+import {getCurrentUser} from "@/store/user/user.selectors.ts";
+import {updateProfile} from '@/store/user/user.slice.ts';
+import {logoutUser} from '@/store/user/user.actions.ts';
+import type {Article} from '@/types';
+import {ViewMode} from '@/types';
 
 type Panel = 'account' | 'saved';
 type Notice = { variant: 'success' | 'secondary'; message: string };
@@ -17,7 +19,7 @@ function ProfilePage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const dispatch = useAppDispatch();
-    const user = useAppSelector((state) => state.user.currentUser);
+    const user = useAppSelector(getCurrentUser);
 
     // Tab mặc định
     const initialPanel = (searchParams.get('saved') ? 'saved' : 'account') as Panel;
@@ -29,11 +31,6 @@ function ProfilePage() {
 
     // Popup message
     const [notice, setNotice] = useState<Notice | null>(null);
-
-    // Nếu chưa login thì về /login
-    useEffect(() => {
-        if (!user) navigate('/login');
-    }, [user, navigate]);
 
     // Lấy danh sách bài đã lưu
     useEffect(() => {

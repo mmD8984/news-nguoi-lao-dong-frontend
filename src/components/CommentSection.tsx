@@ -2,9 +2,11 @@ import {useMemo, useState} from 'react';
 import {Button, Form, Modal, Nav} from 'react-bootstrap';
 import {useNavigate} from 'react-router-dom';
 import {BsHandThumbsUp} from 'react-icons/bs';
-import {useAppDispatch, useAppSelector} from '../store/hooks';
-import {addComment, addReply, toggleLike} from '../store/commentsSlice';
-import {formatCommentTime} from '../data/utils/dateHelpers';
+
+import {useAuth} from '@/hooks/useAuth';
+import {useAppDispatch, useAppSelector} from '@/store/hooks';
+import {addComment, addReply, toggleLike} from '@/store/commentsSlice';
+import {formatCommentTime} from '@/data/utils/dateHelpers';
 
 type CommentTab = 'new' | 'top';
 
@@ -67,7 +69,7 @@ function pickAvatarUrl(opts: {
 export default function CommentSection({articleId}: CommentSectionProps) {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const user = useAppSelector((state) => state.user.currentUser);
+    const {user, isAuthenticated} = useAuth();
     const commentsByArticleId = useAppSelector((state) => state.comments.byArticleId);
 
     // Data comment theo bài viết
@@ -92,7 +94,7 @@ export default function CommentSection({articleId}: CommentSectionProps) {
 
     // Chặn thao tác nếu chưa login
     function requireLogin() {
-        if (!user) {
+        if (!isAuthenticated) {
             setShowLoginModal(true);
             return true;
         }
