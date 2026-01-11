@@ -1,3 +1,5 @@
+@import '../base/variables';
+
 .profile-sidebar {
     overflow: hidden;
 }
@@ -9,12 +11,17 @@
     border-radius: 50%;
     overflow: hidden;
     background-color: #f2f3f5;
-    border: 1px solid var(--nld-border-light);
+    border: 1px solid $nld-border-light;
 }
 
 .profile-avatar--sm {
     width: 42px;
     height: 42px;
+}
+
+.profile-avatar--md {
+    width: 56px;
+    height: 56px;
 }
 
 .profile-avatar--lg {
@@ -30,35 +37,72 @@
     border: 0;
     display: flex;
     align-items: center;
-    gap: var(--spacing-3);
-    padding-top: var(--spacing-3);
-    padding-bottom: var(--spacing-3);
+    gap: $spacing-3;
+    padding-top: $spacing-3;
+    padding-bottom: $spacing-3;
     color: #6c757d;
 }
 
 .profile-nav__item:hover {
-    color: var(--nld-blue);
+    color: $nld-blue;
     background-color: #f8f9fa;
 }
 
 .profile-nav__item.active {
-    color: var(--nld-blue);
+    color: $nld-blue;
     background-color: rgba(46, 89, 173, 0.08);
     font-weight: 700;
-    border-left: 4px solid var(--nld-blue);
+    border-left: 4px solid $nld-blue;
 }
 
 .profile-section-title {
     display: flex;
     align-items: center;
-    gap: var(--spacing-3);
+    gap: $spacing-3;
     font-weight: 800;
-    color: var(--nld-dark);
+    color: $nld-dark;
 }
 
 .profile-section-title__bar {
     width: 4px;
     height: 22px;
-    background-color: var(--nld-blue);
+    background-color: $nld-blue;
     border-radius: 2px;
+}
+
+.profile-sidebar__header {
+    background-color: #fff;
+}
+
+.profile-sidebar__section {
+    padding: $spacing-3 $spacing-4;
+    background-color: #fafafa;
+    border-bottom: 1px solid $nld-border-light;
+}
+
+.profile-sidebar__section-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6c757d;
+}
+
+.profile-nav__item--logout {
+    color: #6c757d;
+}
+
+.profile-nav__item--logout:hover {
+    color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.profile-stat-card {
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.profile-stat-card:hover {
+    background-color: #e3f2fd !important;
 }

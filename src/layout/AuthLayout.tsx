@@ -12,10 +12,10 @@ function AuthLayout() {
       <ScrollToTop />
 
       {/* Header */}
-      <div className="auth-page__header bg-nld-auth py-3 shadow-sm">
+      <div className="bg-nld-auth py-3 shadow-sm">
         <Container className="position-relative d-flex justify-content-center align-items-center">
-          <Link to="/" className="text-decoration-none auth-page__logo">
-            <img src={logoNldDark} alt="Bao Nguoi Lao Dong" />
+          <Link to="/" className="text-decoration-none">
+            <img src={logoNldDark} alt="Bao Nguoi Lao Dong" className="img-fluid" style={{ height: "40px" }} />
           </Link>
         </Container>
       </div>

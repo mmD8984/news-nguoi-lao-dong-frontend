@@ -29,7 +29,7 @@ const baseRegisterPasswordRules: RegisterOptions<FieldValues, string> = {
   },
 };
 
-const baseFullNameRules: RegisterOptions<FieldValues, string> = {
+const baseDisplayNameRules: RegisterOptions<FieldValues, string> = {
   required: "Vui lòng nhập họ và tên.",
   pattern: {
     value: fullNameRegex,
@@ -48,8 +48,8 @@ export const loginPasswordRules = makeRules<LoginFormData, "password">(
   baseLoginPasswordRules
 );
 
-export const registerFullNameRules = makeRules<RegisterFormData, "fullName">(
-  baseFullNameRules
+export const registerDisplayNameRules = makeRules<RegisterFormData, "displayName">(
+  baseDisplayNameRules
 );
 export const registerEmailRules = makeRules<RegisterFormData, "email">(
   baseEmailRules

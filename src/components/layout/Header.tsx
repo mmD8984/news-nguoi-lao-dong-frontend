@@ -3,6 +3,7 @@ import {Container} from 'react-bootstrap';
 import {Link, NavLink, useLocation, useNavigate} from 'react-router-dom';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
+import {toast} from 'react-toastify';
 import {
     BsBarChart,
     BsBoxArrowRight,
@@ -58,7 +59,7 @@ function Header() {
     // Danh sách item trong menu user
     const userMenuItems = useMemo(
         () => [
-            {label: 'Thông tin tài khoản', path: '/profile', icon: 'BsPerson'},
+            {label: 'Thông tin tài khoản', path: '/thong-tin-ca-nhan/tai-khoan', icon: 'BsPerson'},
             {label: 'Đăng xuất', path: '#', icon: 'BsBoxArrowRight'}
         ],
         []
@@ -139,9 +140,9 @@ function Header() {
     };
 
     // Logout: clear redux + về Home
-    const handleLogout = () => {
-        dispatch(logoutUser());
-        setShowUserMenu(false);
+    const handleLogout = async () => {
+        await dispatch(logoutUser());
+        toast.success("Đăng xuất thành công");
         navigate('/');
     };
 
@@ -238,7 +239,7 @@ function Header() {
                                                 ? <img src={user.avatar} alt="avatar"/>
                                                 : <BsPersonCircle size={30} className="text-secondary"/>
                                             }
-                                            <Link to="/profile" className="text-dark text-truncate">
+                                            <Link to="/thong-tin-ca-nhan" className="text-dark text-truncate">
                                                 {user.displayName}
                                             </Link>
                                         </div>

@@ -1,36 +1,42 @@
-import {type ChangeEvent, useEffect, useMemo, useState} from 'react';
-import {useNavigate, useSearchParams} from 'react-router-dom';
-import {Alert, Button, Card, Col, Container, Form, ListGroup, Row} from 'react-bootstrap';
-import {BsBookmark, BsBoxArrowRight, BsPerson, BsPersonCircle} from 'react-icons/bs';
+import {useEffect, useState} from 'react';
+import {useNavigate, useParams} from 'react-router-dom';
+import {Col, Container, Row} from 'react-bootstrap';
+import {toast} from "react-toastify";
 
-import NewsCard from '@/components/NewsCard';
+import ProfileSidebar from '@/pages/profile/ProfileSidebar';
+import OverviewPanel from '@/pages/profile/panels/OverviewPanel';
+import AccountPanel from '@/pages/profile/panels/AccountPanel';
+import SavedPanel from '@/pages/profile/panels/SavedPanel';
+import ViewedPanel from '@/pages/profile/panels/ViewedPanel';
+import TransactionsPanel from '@/pages/profile/panels/TransactionsPanel';
 import {getUserSavedArticles} from '@/services/api';
 import {useAppDispatch, useAppSelector} from '@/store/hooks';
 import {getCurrentUser} from "@/store/user/user.selectors.ts";
-import {updateProfile} from '@/store/user/user.slice.ts';
 import {logoutUser} from '@/store/user/user.actions.ts';
 import type {Article} from '@/types';
-import {ViewMode} from '@/types';
 
-type Panel = 'account' | 'saved';
-type Notice = { variant: 'success' | 'secondary'; message: string };
+export type Panel = 'tong-quan' | 'tai-khoan' | 'bai-da-luu' | 'bai-da-xem' | 'binh-luan' | 'giao-dich';
 
 function ProfilePage() {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
     const dispatch = useAppDispatch();
     const user = useAppSelector(getCurrentUser);
+    const {section} = useParams<{section?: string}>();
 
-    // Tab mặc định
-    const initialPanel = (searchParams.get('saved') ? 'saved' : 'account') as Panel;
-    const [active, setActive] = useState<Panel>(initialPanel);
 
-    // Saved articles
+    // Lấy active panel từ URL, mặc định là 'tong-quan'
+    const active = (section || 'tong-quan') as Panel;
+
+    // Chuyển hướng đến /thong-tin-ca-nhan/tong-quan nếu không có section cụ thể
+    useEffect(() => {
+        if (!section) {
+            navigate('/thong-tin-ca-nhan/tong-quan', {replace: true});
+        }
+    }, [section, navigate]);
+
+    // Bài viết đã lưu
     const [savedArticles, setSavedArticles] = useState<Article[]>([]);
     const [loadingSaved, setLoadingSaved] = useState(false);
-
-    // Popup message
-    const [notice, setNotice] = useState<Notice | null>(null);
 
     // Lấy danh sách bài đã lưu
     useEffect(() => {
@@ -44,233 +50,36 @@ function ProfilePage() {
             .finally(() => setLoadingSaved(false));
     }, [user?.id, user?.savedArticleIds?.join('|')]);
 
-    // Tự động ẩn popup message
-    useEffect(() => {
-        if (!notice) return;
-        const t = window.setTimeout(() => setNotice(null), 1000);
-        return () => window.clearTimeout(t);
-    }, [notice]);
-
-    const genderLabel = useMemo(() => {
-        if (!user?.gender) return 'Chưa chọn';
-        if (user.gender === 'male') return 'Nam';
-        if (user.gender === 'female') return 'Nữ';
-        return 'Khác';
-    }, [user?.gender]);
-
     if (!user) return null;
 
     return (
         <div className="profile-page bg-light font-sans py-4 py-lg-5 min-vh-100">
-            {/* Popup message */}
-            {notice && (
-                <div className="article-notice">
-                    <Alert
-                        variant={notice.variant}
-                        className="m-0 py-2 px-3 shadow-sm"
-                        dismissible
-                        onClose={() => setNotice(null)}
-                    >
-                        {notice.message}
-                    </Alert>
-                </div>
-            )}
-
             <Container>
                 <Row className="g-4">
                     {/* Sidebar profile */}
                     <Col lg={3}>
-                        <Card className="border-0 shadow-sm profile-sidebar">
-                            <div className="p-3 border-bottom">
-                                <div className="d-flex align-items-center gap-3">
-                                    <div className="profile-avatar profile-avatar--sm">
-                                        {user.avatar ? (
-                                            <img src={user.avatar} alt="avatar"
-                                                 className="w-100 h-100 object-fit-cover"/>
-                                        ) : (
-                                            <BsPersonCircle size={34} className="text-secondary"/>
-                                        )}
-                                    </div>
-                                    <div className="flex-grow-1">
-                                        <div className="fw-bold text-dark text-truncate">{user.displayName}</div>
-                                        <div className="text-secondary small text-truncate">{user.emailOrPhone}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <ListGroup variant="flush" className="profile-nav">
-                                <ListGroup.Item
-                                    action
-                                    className={`profile-nav__item ${active === 'account' ? 'active' : ''}`}
-                                    onClick={() => setActive('account')}
-                                >
-                                    <BsPerson size={18}/> Thông tin tài khoản
-                                </ListGroup.Item>
-                                <ListGroup.Item
-                                    action
-                                    className={`profile-nav__item ${active === 'saved' ? 'active' : ''}`}
-                                    onClick={() => setActive('saved')}
-                                >
-                                    <BsBookmark size={18}/> Bài đã lưu
-                                </ListGroup.Item>
-                                <ListGroup.Item
-                                    action
-                                    className="profile-nav__item text-danger"
-                                    onClick={() => {
-                                        dispatch(logoutUser());
-                                        navigate('/');
-                                    }}
-                                >
-                                    <BsBoxArrowRight size={18}/> Đăng xuất
-                                </ListGroup.Item>
-                            </ListGroup>
-                        </Card>
+                        <ProfileSidebar
+                            user={user}
+                            activePanel={active}
+                            onLogout={async () => {
+                                await dispatch(logoutUser());
+                                toast.success("Đăng xuất thành công");
+                                navigate('/');
+                            }}
+                        />
                     </Col>
 
                     {/* Main content */}
                     <Col lg={9}>
-                        {/* Panel: Account */}
-                        {active === 'account' && (
-                            <Card className="border-0 shadow-sm p-4">
-                                <h4 className="profile-section-title mb-4">
-                                    <span className="profile-section-title__bar"/>
-                                    Thông tin tài khoản
-                                </h4>
-
-                                <Row className="g-4 align-items-start">
-                                    {/* Avatar */}
-                                    <Col md={4} className="text-center">
-                                        <div className="text-secondary small text-start mb-2">Ảnh đại diện</div>
-                                        <div className="profile-avatar profile-avatar--lg mx-auto">
-                                            {user.avatar ? (
-                                                <img src={user.avatar} alt="avatar"
-                                                     className="w-100 h-100 object-fit-cover"/>
-                                            ) : (
-                                                <BsPersonCircle size={60} className="text-secondary"/>
-                                            )}
-                                        </div>
-
-                                        <div className="mt-3">
-                                            <Form.Label className="btn btn-outline-secondary btn-sm mb-0">
-                                                Thay đổi
-                                                <Form.Control
-                                                    type="file"
-                                                    accept="image/*"
-                                                    className="d-none"
-                                                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (!file) return;
-                                                        const url = URL.createObjectURL(file);
-                                                        dispatch(updateProfile({avatar: url}));
-                                                    }}
-                                                />
-                                            </Form.Label>
-                                        </div>
-                                    </Col>
-
-                                    {/* Form */}
-                                    <Col md={8}>
-                                        <Form>
-                                            <Row className="mb-3 align-items-center">
-                                                <Col sm={4} className="text-secondary">
-                                                    ID tài khoản
-                                                </Col>
-                                                <Col sm={8}
-                                                     className="d-flex align-items-center justify-content-between">
-                                                    <span className="text-dark text-break">{user.id}</span>
-                                                    <Button
-                                                        variant="link"
-                                                        className="p-0 small text-decoration-none"
-                                                        onClick={async () => {
-                                                            try {
-                                                                await navigator.clipboard.writeText(user.id);
-                                                            } catch {
-                                                                // ignore
-                                                            }
-                                                        }}
-                                                    >
-                                                        Sao chép
-                                                    </Button>
-                                                </Col>
-                                            </Row>
-
-                                            <Row className="mb-3 align-items-center">
-                                                <Col sm={4} className="text-secondary">
-                                                    Tên hiển thị
-                                                </Col>
-                                                <Col sm={8}>
-                                                    <Form.Control
-                                                        value={user.displayName}
-                                                        onChange={(e) => dispatch(updateProfile({displayName: e.target.value}))}
-                                                    />
-                                                </Col>
-                                            </Row>
-
-                                            <Row className="mb-3 align-items-center">
-                                                <Col sm={4} className="text-secondary">
-                                                    Giới tính
-                                                </Col>
-                                                <Col sm={8}>
-                                                    <Form.Select
-                                                        value={user.gender ?? ''}
-                                                        onChange={(e) => dispatch(updateProfile({gender: (e.target.value as any) || null}))}
-                                                    >
-                                                        <option value="">{genderLabel}</option>
-                                                        <option value="male">Nam</option>
-                                                        <option value="female">Nữ</option>
-                                                        <option value="other">Khác</option>
-                                                    </Form.Select>
-                                                </Col>
-                                            </Row>
-
-                                            <Row className="mb-4 align-items-center">
-                                                <Col sm={4} className="text-secondary">
-                                                    Email / SĐT
-                                                </Col>
-                                                <Col sm={8}>
-                                                    <Form.Control value={user.emailOrPhone} disabled
-                                                                  className="bg-light"/>
-                                                </Col>
-                                            </Row>
-
-                                            {/* Action: Lưu thay đổi (demo) */}
-                                            <div className="d-flex justify-content-end">
-                                                <Button
-                                                    className="bg-nld-auth border-0 px-4 fw-bold"
-                                                    onClick={() => {
-                                                        setNotice({variant: 'success', message: 'Đã lưu thay đổi'});
-                                                    }}
-                                                >
-                                                    Lưu thay đổi
-                                                </Button>
-                                            </div>
-                                        </Form>
-                                    </Col>
-                                </Row>
-                            </Card>
+                        {active === 'tong-quan' && <OverviewPanel/>}
+                        {active === 'tai-khoan' && (
+                            <AccountPanel
+                                onSaveSuccess={() => {}}
+                            />
                         )}
-
-                        {/* Panel: Saved */}
-                        {active === 'saved' && (
-                            <Card className="border-0 shadow-sm p-4">
-                                <h4 className="profile-section-title mb-4">
-                                    <span className="profile-section-title__bar"/>
-                                    Bài đã lưu
-                                </h4>
-
-                                {loadingSaved ? (
-                                    <p className="text-secondary mb-0">Loading...</p>
-                                ) : savedArticles.length === 0 ? (
-                                    <p className="text-muted mb-0">Bạn chưa lưu bài viết nào.</p>
-                                ) : (
-                                    <div className="d-flex flex-column gap-2">
-                                        {savedArticles.map((a) => (
-                                            <NewsCard key={a.id} article={a} mode={ViewMode.SEARCH_RESULT}/>
-                                        ))}
-                                    </div>
-                                )}
-                            </Card>
-                        )}
+                        {active === 'bai-da-luu' && <SavedPanel articles={savedArticles} loading={loadingSaved}/>}
+                        {active === 'bai-da-xem' && <ViewedPanel/>}
+                        {active === 'giao-dich' && <TransactionsPanel/>}
                     </Col>
                 </Row>
             </Container>

@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {type SubmitHandler, useForm} from "react-hook-form";
 import {Link, useLocation, useNavigate} from "react-router-dom";
-import {Button, Col, Container, Form, Row, Tab, Tabs} from "react-bootstrap";
+import {Button, Col, Container, Form, Nav, Row, Tab} from "react-bootstrap";
 import {toast} from "react-toastify";
 import {BsEye, BsEyeSlash} from "react-icons/bs";
 
@@ -14,7 +14,7 @@ import {
     loginEmailRules,
     loginPasswordRules,
     registerEmailRules,
-    registerFullNameRules,
+    registerDisplayNameRules,
     registerPasswordRules,
     validateConfirmPassword,
 } from "@/utils/formValidation";
@@ -74,7 +74,7 @@ function AuthPage() {
         const payload = {
             email: data.email,
             password: data.password,
-            fullName: data.fullName,
+            displayName: data.displayName,
         };
         try {
             await dispatch(registerUser(payload)).unwrap();
@@ -109,233 +109,248 @@ function AuthPage() {
 
     return (
         <Container className="py-5">
-            <Row className="justify-content-center">
+            <Row className="justify-content-center gap-0">
                 <Col xs={12} md={8} lg={5}>
                     {/* Tabs: login/register */}
-                    <Tabs
-                        activeKey={activeTab}
-                        onSelect={handleTabSelect}
-                        className="mb-4"
-                        justify
-                    >
-                        <Tab eventKey="login" title="Đăng nhập">
-                            {/* Form login */}
-                            <Form
-                                className="mt-4"
-                                onSubmit={handleLoginSubmit(onLoginSubmit)}
-                            >
-                                <Form.Group className="mb-3">
-                                    <Form.Label className="fw-bold small">Email</Form.Label>
-                                    <Form.Control
-                                        type="email"
-                                        placeholder="Nhập Email"
-                                        isInvalid={!!loginErrors.email}
-                                        {...registerLogin("email", loginEmailRules)}
-                                        className="py-2"
-                                    />
-                                    <Form.Control.Feedback type="invalid">
-                                        {loginErrors.email?.message}
-                                    </Form.Control.Feedback>
-                                </Form.Group>
+                    <Tab.Container activeKey={activeTab} onSelect={handleTabSelect}>
+                        <Nav variant="underline" className="mb-4 font-serif gap-0 border-bottom justify-content-center">
+                            <Nav.Item className="w-50">
+                                <Nav.Link
+                                    eventKey="login"
+                                    className={`fs-5 pb-2 text-center ${activeTab === 'login' ? 'fw-bold text-nld-blue' : 'fw-semibold text-muted'}`}
+                                >
+                                    Đăng nhập
+                                </Nav.Link>
+                            </Nav.Item>
+                            <Nav.Item className="w-50">
+                                <Nav.Link
+                                    eventKey="register"
+                                    className={`fs-5 pb-2 text-center ${activeTab === 'register' ? 'fw-bold text-nld-blue' : 'fw-semibold text-muted'}`}
+                                >
+                                    Đăng ký tài khoản
+                                </Nav.Link>
+                            </Nav.Item>
+                        </Nav>
 
-                                <Form.Group className="mb-3">
-                                    <Form.Label className="fw-bold small">Mật khẩu</Form.Label>
-                                    <div className="position-relative">
+                        <Tab.Content>
+                            <Tab.Pane eventKey="login">
+                                {/* Form login */}
+                                <Form
+                                    className="mt-4"
+                                    onSubmit={handleLoginSubmit(onLoginSubmit)}
+                                >
+                                    <Form.Group className="mb-3">
+                                        <Form.Label className="fw-bold small">Email</Form.Label>
                                         <Form.Control
-                                            type={showLoginPassword ? "text" : "password"}
-                                            placeholder="Nhập mật khẩu"
-                                            isInvalid={!!loginErrors.password}
-                                            {...registerLogin("password", loginPasswordRules)}
-                                            className="py-2 pe-5"
+                                            type="email"
+                                            placeholder="Nhập Email"
+                                            isInvalid={!!loginErrors.email}
+                                            {...registerLogin("email", loginEmailRules)}
+                                            className="py-2"
                                         />
-                                        {loginPasswordValue && (
-                                            <Button
-                                                variant="link"
-                                                type="button"
-                                                tabIndex={-1}
-                                                onClick={() => setShowLoginPassword((v) => !v)}
-                                                aria-label={
-                                                    showLoginPassword
-                                                        ? "Ẩn mật khẩu"
-                                                        : "Hiển thị mật khẩu"
-                                                }
-                                                className="position-absolute end-0 top-50 translate-middle-y text-muted px-3"
-                                            >
-                                                {showLoginPassword ? (
-                                                    <BsEyeSlash size={18}/>
-                                                ) : (
-                                                    <BsEye size={18}/>
-                                                )}
-                                            </Button>
-                                        )}
-                                    </div>
-                                    {loginErrors.password?.message && (
-                                        <div className="invalid-feedback d-block">
-                                            {loginErrors.password.message}
-                                        </div>
-                                    )}
-                                </Form.Group>
+                                        <Form.Control.Feedback type="invalid">
+                                            {loginErrors.email?.message}
+                                        </Form.Control.Feedback>
+                                    </Form.Group>
 
-                                <div className="d-flex justify-content-end mb-4">
-                                    <Link
-                                        to="/forgot-password"
-                                        className="small text-muted text-decoration-none"
+                                    <Form.Group className="mb-3">
+                                        <Form.Label className="fw-bold small">Mật khẩu</Form.Label>
+                                        <div className="position-relative">
+                                            <Form.Control
+                                                type={showLoginPassword ? "text" : "password"}
+                                                placeholder="Nhập mật khẩu"
+                                                isInvalid={!!loginErrors.password}
+                                                {...registerLogin("password", loginPasswordRules)}
+                                                className="py-2 pe-5"
+                                            />
+                                            {loginPasswordValue && (
+                                                <Button
+                                                    variant="link"
+                                                    type="button"
+                                                    tabIndex={-1}
+                                                    onClick={() => setShowLoginPassword((v) => !v)}
+                                                    aria-label={
+                                                        showLoginPassword
+                                                            ? "Ẩn mật khẩu"
+                                                            : "Hiển thị mật khẩu"
+                                                    }
+                                                    className="position-absolute end-0 top-50 translate-middle-y text-muted px-3"
+                                                >
+                                                    {showLoginPassword ? (
+                                                        <BsEyeSlash size={18}/>
+                                                    ) : (
+                                                        <BsEye size={18}/>
+                                                    )}
+                                                </Button>
+                                            )}
+                                        </div>
+                                        {loginErrors.password?.message && (
+                                            <div className="invalid-feedback d-block">
+                                                {loginErrors.password.message}
+                                            </div>
+                                        )}
+                                    </Form.Group>
+
+                                    <div className="d-flex justify-content-end mb-4">
+                                        <Link
+                                            to="/forgot-password"
+                                            className="small text-muted text-decoration-none"
+                                        >
+                                            Quên mật khẩu?
+                                        </Link>
+                                    </div>
+
+                                    <Button
+                                        type="submit"
+                                        className="w-100 bg-nld-auth border-0 py-2 fw-bold mb-4"
+                                        size="lg"
+                                        disabled={isLoginSubmitting}
                                     >
-                                        Quên mật khẩu?
-                                    </Link>
-                                </div>
+                                        Tiếp tục
+                                    </Button>
+                                </Form>
+                            </Tab.Pane>
 
-                                <Button
-                                    type="submit"
-                                    className="w-100 bg-nld-auth border-0 py-2 fw-bold mb-4"
-                                    size="lg"
-                                    disabled={isLoginSubmitting}
+                            <Tab.Pane eventKey="register">
+                                {/* Form register */}
+                                <Form
+                                    className="mt-4"
+                                    onSubmit={handleRegisterSubmit(onRegisterSubmit)}
                                 >
-                                    Tiếp tục
-                                </Button>
-                            </Form>
-                        </Tab>
-
-                        <Tab eventKey="register" title="Đăng ký tài khoản">
-                            {/* Form register */}
-                            <Form
-                                className="mt-4"
-                                onSubmit={handleRegisterSubmit(onRegisterSubmit)}
-                            >
-                                <Form.Group className="mb-3">
-                                    <Form.Label className="fw-bold small">Họ và tên</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Nhập họ và tên"
-                                        isInvalid={!!registerErrors.fullName}
-                                        {...registerRegister("fullName", registerFullNameRules)}
-                                        className="py-2"
-                                    />
-                                    <Form.Control.Feedback type="invalid">
-                                        {registerErrors.fullName?.message}
-                                    </Form.Control.Feedback>
-                                </Form.Group>
-
-                                <Form.Group className="mb-3">
-                                    <Form.Label className="fw-bold small">Email</Form.Label>
-                                    <Form.Control
-                                        type="email"
-                                        placeholder="Nhập Email"
-                                        isInvalid={!!registerErrors.email}
-                                        {...registerRegister("email", registerEmailRules)}
-                                        className="py-2"
-                                    />
-                                    <Form.Control.Feedback type="invalid">
-                                        {registerErrors.email?.message}
-                                    </Form.Control.Feedback>
-                                </Form.Group>
-
-                                <Form.Group className="mb-3">
-                                    <Form.Label className="fw-bold small">Mật khẩu</Form.Label>
-                                    <div className="position-relative">
+                                    <Form.Group className="mb-3">
+                                        <Form.Label className="fw-bold small">Họ và tên</Form.Label>
                                         <Form.Control
-                                            type={showRegisterPassword ? "text" : "password"}
-                                            placeholder="Nhập mật khẩu"
-                                            isInvalid={!!registerErrors.password}
-                                            {...registerRegister("password", registerPasswordRules)}
-                                            className="py-2 pe-5"
+                                            type="text"
+                                            placeholder="Nhập họ và tên"
+                                            isInvalid={!!registerErrors.displayName}
+                                            {...registerRegister("displayName", registerDisplayNameRules)}
+                                            className="py-2"
                                         />
-                                        {registerPasswordValue && (
-                                            <Button
-                                                variant="link"
-                                                type="button"
-                                                tabIndex={-1}
-                                                onClick={() => setShowRegisterPassword((v) => !v)}
-                                                aria-label={
-                                                    showRegisterPassword
-                                                        ? "Ẩn mật khẩu"
-                                                        : "Hiển thị mật khẩu"
-                                                }
-                                                className="position-absolute end-0 top-50 translate-middle-y text-muted px-3"
-                                            >
-                                                {showRegisterPassword ? (
-                                                    <BsEyeSlash size={18}/>
-                                                ) : (
-                                                    <BsEye size={18}/>
-                                                )}
-                                            </Button>
-                                        )}
-                                    </div>
-                                    {registerErrors.password?.message && (
-                                        <div className="invalid-feedback d-block">
-                                            {registerErrors.password.message}
-                                        </div>
-                                    )}
-                                </Form.Group>
+                                        <Form.Control.Feedback type="invalid">
+                                            {registerErrors.displayName?.message}
+                                        </Form.Control.Feedback>
+                                    </Form.Group>
 
-                                <Form.Group className="mb-4">
-                                    <Form.Label className="fw-bold small">
-                                        Xác nhận mật khẩu
-                                    </Form.Label>
-                                    <div className="position-relative">
+                                    <Form.Group className="mb-3">
+                                        <Form.Label className="fw-bold small">Email</Form.Label>
                                         <Form.Control
-                                            type={showRegisterConfirmPassword ? "text" : "password"}
-                                            placeholder="Nhập lại mật khẩu"
-                                            isInvalid={!!registerErrors.confirmPassword}
-                                            {...registerRegister("confirmPassword", {
-                                                required: confirmPasswordRequiredMessage,
-                                                validate: (value) =>
-                                                    validateConfirmPassword(
-                                                        value,
-                                                        getRegisterValues("password")
-                                                    ),
-                                            })}
-                                            className="py-2 pe-5"
+                                            type="email"
+                                            placeholder="Nhập Email"
+                                            isInvalid={!!registerErrors.email}
+                                            {...registerRegister("email", registerEmailRules)}
+                                            className="py-2"
                                         />
-                                        {registerConfirmValue && (
-                                            <Button
-                                                variant="link"
-                                                type="button"
-                                                tabIndex={-1}
-                                                onClick={() =>
-                                                    setShowRegisterConfirmPassword((v) => !v)
-                                                }
-                                                aria-label={
-                                                    showRegisterConfirmPassword
-                                                        ? "Ẩn mật khẩu"
-                                                        : "Hiển thị mật khẩu"
-                                                }
-                                                className="position-absolute end-0 top-50 translate-middle-y text-muted px-3"
-                                            >
-                                                {showRegisterConfirmPassword ? (
-                                                    <BsEyeSlash size={18}/>
-                                                ) : (
-                                                    <BsEye size={18}/>
-                                                )}
-                                            </Button>
-                                        )}
-                                    </div>
-                                    {registerErrors.confirmPassword?.message && (
-                                        <div className="invalid-feedback d-block">
-                                            {registerErrors.confirmPassword.message}
-                                        </div>
-                                    )}
-                                </Form.Group>
+                                        <Form.Control.Feedback type="invalid">
+                                            {registerErrors.email?.message}
+                                        </Form.Control.Feedback>
+                                    </Form.Group>
 
-                                <Button
-                                    type="submit"
-                                    className="w-100 bg-nld-auth border-0 py-2 fw-bold mb-4"
-                                    size="lg"
-                                    disabled={isRegisterSubmitting}
-                                >
-                                    Đăng ký
-                                </Button>
-                            </Form>
-                        </Tab>
-                    </Tabs>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label className="fw-bold small">Mật khẩu</Form.Label>
+                                        <div className="position-relative">
+                                            <Form.Control
+                                                type={showRegisterPassword ? "text" : "password"}
+                                                placeholder="Nhập mật khẩu"
+                                                isInvalid={!!registerErrors.password}
+                                                {...registerRegister("password", registerPasswordRules)}
+                                                className="py-2 pe-5"
+                                            />
+                                            {registerPasswordValue && (
+                                                <Button
+                                                    variant="link"
+                                                    type="button"
+                                                    tabIndex={-1}
+                                                    onClick={() => setShowRegisterPassword((v) => !v)}
+                                                    aria-label={
+                                                        showRegisterPassword
+                                                            ? "Ẩn mật khẩu"
+                                                            : "Hiển thị mật khẩu"
+                                                    }
+                                                    className="position-absolute end-0 top-50 translate-middle-y text-muted px-3"
+                                                >
+                                                    {showRegisterPassword ? (
+                                                        <BsEyeSlash size={18}/>
+                                                    ) : (
+                                                        <BsEye size={18}/>
+                                                    )}
+                                                </Button>
+                                            )}
+                                        </div>
+                                        {registerErrors.password?.message && (
+                                            <div className="invalid-feedback d-block">
+                                                {registerErrors.password.message}
+                                            </div>
+                                        )}
+                                    </Form.Group>
+
+                                    <Form.Group className="mb-4">
+                                        <Form.Label className="fw-bold small">
+                                            Xác nhận mật khẩu
+                                        </Form.Label>
+                                        <div className="position-relative">
+                                            <Form.Control
+                                                type={showRegisterConfirmPassword ? "text" : "password"}
+                                                placeholder="Nhập lại mật khẩu"
+                                                isInvalid={!!registerErrors.confirmPassword}
+                                                {...registerRegister("confirmPassword", {
+                                                    required: confirmPasswordRequiredMessage,
+                                                    validate: (value) =>
+                                                        validateConfirmPassword(
+                                                            value,
+                                                            getRegisterValues("password")
+                                                        ),
+                                                })}
+                                                className="py-2 pe-5"
+                                            />
+                                            {registerConfirmValue && (
+                                                <Button
+                                                    variant="link"
+                                                    type="button"
+                                                    tabIndex={-1}
+                                                    onClick={() =>
+                                                        setShowRegisterConfirmPassword((v) => !v)
+                                                    }
+                                                    aria-label={
+                                                        showRegisterConfirmPassword
+                                                            ? "Ẩn mật khẩu"
+                                                            : "Hiển thị mật khẩu"
+                                                    }
+                                                    className="position-absolute end-0 top-50 translate-middle-y text-muted px-3"
+                                                >
+                                                    {showRegisterConfirmPassword ? (
+                                                        <BsEyeSlash size={18}/>
+                                                    ) : (
+                                                        <BsEye size={18}/>
+                                                    )}
+                                                </Button>
+                                            )}
+                                        </div>
+                                        {registerErrors.confirmPassword?.message && (
+                                            <div className="invalid-feedback d-block">
+                                                {registerErrors.confirmPassword.message}
+                                            </div>
+                                        )}
+                                    </Form.Group>
+
+                                    <Button
+                                        type="submit"
+                                        className="w-100 bg-nld-auth border-0 py-2 fw-bold mb-4"
+                                        size="lg"
+                                        disabled={isRegisterSubmitting}
+                                    >
+                                        Đăng ký
+                                    </Button>
+                                </Form>
+                            </Tab.Pane>
+                        </Tab.Content>
+                    </Tab.Container>
 
                     {/* Divider */}
                     <div className="position-relative mb-4 text-center">
                         <hr/>
-                        <span
-                            className="bg-white px-2 text-muted small position-absolute top-50 start-50 translate-middle">
-              Hoặc đăng nhập với
-            </span>
+                        <span className="bg-white px-2 text-muted small position-absolute top-50 start-50 translate-middle">
+                            Hoặc đăng nhập với
+                        </span>
                     </div>
 
                     <p className="small text-muted text-center mb-4">

@@ -5,12 +5,13 @@
     emailOrPhone: string;
     gender: 'male' | 'female' | 'other' | null;
     savedArticleIds: string[];
+    providers: { providerId: string; uid: string }[];
 }
 
 export interface RegisterRequest {
     email: string;
     password: string;
-    fullName: string;
+    displayName: string;
 }
 
 export interface LoginRequest {
@@ -24,7 +25,7 @@ export interface LoginFormData {
 }
 
 export interface RegisterFormData {
-    fullName: string;
+    displayName: string;
     email: string;
     password: string;
     confirmPassword: string;
@@ -48,4 +49,10 @@ export interface VerifyResetPasswordCodeRequest {
 export interface ConfirmResetPasswordRequest {
     oobCode: string;
     newPassword: string;
+}
+
+export interface UpdateUserRequest {
+    displayName?: string;
+    gender?: 'male' | 'female' | 'other' | null;
+    avatar?: string;
 }

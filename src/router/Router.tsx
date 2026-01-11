@@ -50,8 +50,8 @@ const Router = () => {
 
                     {/* Protected Routes - Ngăn người dùng chưa đăng nhập truy cập */}
                     <Route element={<ProtectedRoute/>}>
-                        <Route path="/" element={<MainLayout/>}>
-                            <Route path="profile" element={<ProfilePage/>}/>
+                        <Route element={<MainLayout/>}>
+                            <Route path="thong-tin-ca-nhan/:section?" element={<ProfilePage/>}/>
                         </Route>
                     </Route>
                 </Routes>

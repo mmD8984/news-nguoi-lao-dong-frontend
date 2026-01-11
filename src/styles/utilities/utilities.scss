@@ -1,14 +1,14 @@
 /* Typography Utilities */
 .font-inter {
-    font-family: var(--font-primary);
+    font-family: $font-primary;
 }
 
 .font-sans {
-    font-family: var(--font-primary);
+    font-family: $font-primary;
 }
 
 .font-serif {
-    font-family: var(--font-secondary);
+    font-family: $font-secondary;
 }
 
 .cursor-pointer {
@@ -17,23 +17,23 @@
 
 /* Color Utilities */
 .text-nld-red {
-    color: var(--nld-red) !important;
+    color: $nld-red !important;
 }
 
 .text-nld-blue {
-    color: var(--nld-blue) !important;
+    color: $nld-blue !important;
 }
 
 .bg-nld-red {
-    background-color: var(--nld-red) !important;
+    background-color: $nld-red !important;
 }
 
 .bg-nld-blue {
-    background-color: var(--nld-blue) !important;
+    background-color: $nld-blue !important;
 }
 
 .bg-nld-auth {
-    background-color: var(--nld-auth) !important;
+    background-color: $nld-auth !important;
 }
 
 .bg-light-blue {
@@ -45,16 +45,16 @@
 }
 
 .hover-link:hover {
-    color: var(--nld-blue) !important;
+    color: $nld-blue !important;
 }
 
 .hover-shadow:hover {
-    box-shadow: var(--shadow-md);
-    transition: box-shadow var(--transition-fast);
+    box-shadow: $shadow-md;
+    transition: box-shadow $transition-fast;
 }
 
 .hover-bg-gray:hover {
-    background-color: var(--nld-border-light) !important;
+    background-color: $nld-border-light !important;
 }
 
 /* Scroll Lock */
