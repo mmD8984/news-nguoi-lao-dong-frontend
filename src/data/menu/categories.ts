@@ -1,4 +1,4 @@
-import type {NavItem} from "../../types";
+import type {NavItem} from "../../types/types.ts";
 
 export const CATEGORIES: NavItem[] = [
   {label: "Thời sự",
@@ -90,7 +90,7 @@ export const CATEGORIES: NavItem[] = [
   {label: "Pháp luật",
     path: "/phap-luat",
     subItems: [
-      { label: "Luật sư của bạn", path: "//phap-luat/luat-su-cua-ban" },
+      { label: "Luật sư của bạn", path: "/phap-luat/luat-su-cua-ban" },
       { label: "Truy nã", path: "/phap-luat/truy-na" },
       { label: "Chuyện pháp đình", path: "/phap-luat/chuyen-phap-dinh" },
     ],

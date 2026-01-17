@@ -17,7 +17,7 @@ export interface Article {
     link?: string;
 }
 
-// ✅ THÊM RSS Article type
+// Thêm RSS Article type
 export interface ArticleRSS {
     id: string;
     title: string;
@@ -25,21 +25,6 @@ export interface ArticleRSS {
     description: string;
     pubDate: string;
     image: string;
-}
-
-export interface CategoryRegistry {
-    slug: string;
-    name: string;
-    rssPath: string;
-    articleIds: string[];
-    heroIds: string[];
-    hotIds: string[];
-}
-
-export interface HomepageRegistry {
-    heroIds: string[];
-    topHotIds: string[];
-    sidebarHotIds: string[];
 }
 
 export interface NavItem {

@@ -3,7 +3,7 @@ import {BsFacebook, BsRss, BsYoutube} from "react-icons/bs";
 import {Link} from "react-router-dom";
 import {Container, Row, Col} from "react-bootstrap";
 import {getCategories} from "../../services/api.ts";
-import type {NavItem} from "../../types.ts";
+import type {NavItem} from "../../types/types.ts";
 import {iconAppStore, iconGooglePlay} from '../../assets';
 import {logoNld} from '@/assets';
 

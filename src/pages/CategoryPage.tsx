@@ -2,15 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Col, Container, Row } from "react-bootstrap";
 
-import NewsCard from "../components/NewsCard";
-import TrendingBar from "../components/TrendingBar";
+import NewsCard from "@/components/NewsCard";
+import TrendingBar from "@/components/TrendingBar";
 
-import type { Article, NavItem } from "../types";
-import { ViewMode } from "../types";
+import type { Article, NavItem } from "@/types/types.ts";
+import { ViewMode } from "@/types/types.ts";
 
-import { getCategories } from "../services/api";
-import { fetchCategoryRSS } from "../services/rss/fetchCategoryRSS.ts";
-import type { RssKey } from "../data/rss";
+import { getCategories } from "@/services/api";
+import { fetchCategoryRSS } from "@/services/rss/fetchCategoryRSS.ts";
+import type { RssKey } from "@/data/rss";
 
 function CategoryPage() {
     const { category, subCategory } = useParams<{
@@ -134,7 +134,7 @@ function CategoryPage() {
                     <p className="text-secondary mb-4">Loading...</p>
                 ) : articles.length === 0 ? (
                     <p className="text-muted mb-4">
-                        Chưa có dữ liệu RSS cho chuyên mục này.
+                        Hệ thống đang tải nhiều dữ liệu, vui lòng thử lại sau.
                     </p>
                 ) : (
                     <>
@@ -146,7 +146,8 @@ function CategoryPage() {
                                         {/* ===== Image (70%) ===== */}
                                         <Col lg={8} md={7}>
                                             <Link
-                                                to={`/article/${heroArticle.id}`}
+                                                to={`/article/${encodeURIComponent(heroArticle.link || heroArticle.id)}`}
+                                                state={{ article: heroArticle }}
                                                 className="d-block h-100 overflow-hidden rounded-2"
                                             >
                                                 <img
@@ -162,7 +163,8 @@ function CategoryPage() {
                                         <Col lg={4} md={5}>
                                             <div className="d-flex flex-column h-100">
                                                 <Link
-                                                    to={`/article/${heroArticle.id}`}
+                                                    to={`/article/${encodeURIComponent(heroArticle.link || heroArticle.id)}`}
+                                                    state={{ article: heroArticle }}
                                                     className="text-decoration-none"
                                                 >
                                                     <h2 className="fw-bold text-dark hover-link mb-3">
@@ -178,7 +180,8 @@ function CategoryPage() {
 
                                                 <div className="mt-auto">
                                                     <Link
-                                                        to={`/article/${heroArticle.id}`}
+                                                        to={`/article/${encodeURIComponent(heroArticle.link || heroArticle.id)}`}
+                                                        state={{ article: heroArticle }}
                                                         className="fw-bold text-nld-red text-decoration-none"
                                                     >
                                                         Đọc tiếp →
@@ -255,7 +258,8 @@ function CategoryPage() {
                                     {relatedArticles.map((a) => (
                                         <Col md={6} key={a.id}>
                                             <Link
-                                                to={`/article/${a.id}`}
+                                                to={`/article/${encodeURIComponent(a.link || a.id)}`}
+                                                state={{ article: a }}
                                                 className="text-decoration-none d-flex gap-3"
                                             >
                                                 <div className="overflow-hidden rounded-1 flex-shrink-0">

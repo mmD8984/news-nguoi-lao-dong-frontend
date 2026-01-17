@@ -20,7 +20,7 @@ import {
 import {useAppDispatch, useAppSelector} from '@/store/hooks.ts';
 import {getCategories} from '@/services/api.ts';
 import type {MegaMenuData} from '@/data/menu';
-import type {NavItem} from '@/types.ts';
+import type {NavItem} from '@/types/types.ts';
 import {logoutUser} from '@/store/user/user.actions.ts';
 import {getCurrentUser} from "@/store/user/user.selectors.ts";
 import {logoNld} from '@/assets';

@@ -1,76 +1,171 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Container, Alert, Spinner } from 'react-bootstrap';
-import { fetchCategoryRSS } from '../services/rss/fetchCategoryRSS';
-import type { Article } from '../types';
-import { RSS_FEEDS, type RssKey } from '../data/rss';
+import { useMemo } from "react";
+import { Alert, Button, Container, Spinner } from "react-bootstrap";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+
+import CommentSection from "@/components/CommentSection";
+import { useResolvedArticle } from "@/hooks/useResolvedArticle";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { toggleSavedArticle } from "@/store/user/user.slice";
+import type { Article } from "@/types/types.ts";
+import { decodeArticleParam, normalizeUrl } from "@/utils/articleUrl";
+import { sanitizeHtml } from "@/utils/sanitizeHtml";
+
+type LocationState = {
+    article?: unknown;
+};
+
+function isArticle(value: unknown): value is Article {
+    const v = value as Article | null;
+    return Boolean(
+        v &&
+        typeof v === "object" &&
+        typeof v.id === "string" &&
+        typeof v.title === "string" &&
+        typeof v.content === "string"
+    );
+}
 
 export default function ArticlePage() {
     const { id } = useParams<{ id: string }>();
-    const [article, setArticle] = useState<Article | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const location = useLocation();
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        if (!id) return;
+    const dispatch = useAppDispatch();
+    const user = useAppSelector((state) => state.user.currentUser);
 
-        // Tìm bài trong tất cả category RSS
-        const loadArticle = async () => {
-            setLoading(true);
-            setError('');
+    const articleUrl = useMemo(() => decodeArticleParam(id), [id]);
 
-            try {
-                let found: Article | null = null;
+    const stateArticleRaw = (location.state as LocationState | null)?.article;
+    const stateArticle = useMemo(() => {
+        if (!articleUrl) return null;
+        if (!isArticle(stateArticleRaw)) return null;
 
-                const keys = Object.keys(RSS_FEEDS) as RssKey[];
-                for (const key of keys) {
-                    const articles = await fetchCategoryRSS(key);
-                    const match = articles.find(a => a.slug === id);
-                    if (match) {
-                        found = match;
-                        break;
-                    }
-                }
+        const target = normalizeUrl(articleUrl);
+        const linkNorm = stateArticleRaw.link ? normalizeUrl(stateArticleRaw.link) : "";
+        const idNorm = normalizeUrl(stateArticleRaw.id);
 
-                if (found) {
-                    setArticle(found);
-                    // Redirect sang trang gốc sau 1.2s
-                    setTimeout(() => {
-                        window.location.href = found.link!;
-                    }, 1200);
-                } else {
-                    setError('Không tìm thấy bài viết.');
-                }
-            } catch (err) {
-                console.error(err);
-                setError('Đã xảy ra lỗi khi tải bài viết.');
-            } finally {
-                setLoading(false);
-            }
-        };
+        return linkNorm === target || idNorm === target ? stateArticleRaw : null;
+    }, [stateArticleRaw, articleUrl]);
 
-        loadArticle();
-    }, [id]);
+    const { article, loading, error } = useResolvedArticle(articleUrl, stateArticle);
+
+    const openUrl = article?.link || articleUrl;
+    const savedKey = normalizeUrl(openUrl);
+    const isSaved = Boolean(user && savedKey && user.savedArticleIds.includes(savedKey));
+
+    const displayTime = useMemo(() => {
+        const raw = article?.publishedAt || "";
+        const d = new Date(raw);
+        return Number.isNaN(d.getTime()) ? raw : d.toLocaleString("vi-VN");
+    }, [article?.publishedAt]);
+
+    const safeHtml = useMemo(() => sanitizeHtml(article?.content || ""), [article?.content]);
+
+    if (!id) {
+        return (
+            <Container className="py-4">
+                <Alert variant="danger">URL bài viết không hợp lệ.</Alert>
+            </Container>
+        );
+    }
 
     return (
         <div className="bg-white font-sans">
-            <Container className="py-4">
-                {loading && (
-                    <div className="text-center py-5">
-                        <Spinner animation="border" role="status" />
-                        <div className="text-secondary mt-2">Đang chuyển hướng đến bài gốc...</div>
+            <Container className="py-3 py-lg-4">
+                {/* Toolbar */}
+                <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+                    <div className="text-secondary small">
+                        <Link to="/" className="text-decoration-none text-secondary hover-link">
+                            Trang chủ
+                        </Link>
+                        {article?.categoryName ? (
+                            <>
+                                <span className="mx-2">/</span>
+                                <span className="text-dark fw-bold">{article.categoryName}</span>
+                            </>
+                        ) : null}
                     </div>
-                )}
 
-                {!loading && error && (
-                    <Alert variant="danger">{error}</Alert>
-                )}
+                    <div className="d-flex gap-2">
+                        {openUrl ? (
+                            <a
+                                href={openUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-outline-secondary btn-sm"
+                            >
+                                Mở bài gốc ↗
+                            </a>
+                        ) : null}
 
-                {!loading && article && (
-                    <Alert variant="info">
-                        Bạn sẽ được chuyển hướng đến bài gốc trên <strong>{article.source}</strong> trong giây lát...
+                        <Button
+                            variant={isSaved ? "danger" : "outline-secondary"}
+                            size="sm"
+                            onClick={() => {
+                                if (!savedKey) return;
+                                if (!user) {
+                                    navigate("/login");
+                                    return;
+                                }
+                                dispatch(toggleSavedArticle(savedKey));
+                            }}
+                        >
+                            {isSaved ? "Đã lưu" : "⭐ Lưu"}
+                        </Button>
+
+                        <Button variant="outline-secondary" size="sm" onClick={() => navigate(-1)}>
+                            ← Quay lại
+                        </Button>
+                    </div>
+                </div>
+
+                {loading && !article ? (
+                    <div className="text-center py-5">
+                        <Spinner animation="border" />
+                    </div>
+                ) : error && !article ? (
+                    <Alert variant="warning">
+                        <div className="fw-bold mb-2">⚠️ Không thể hiển thị bài viết</div>
+                        <div className="mb-3">{error}</div>
+                        {openUrl ? (
+                            <a
+                                href={openUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-primary btn-sm"
+                            >
+                                Mở bài trên nld.com.vn
+                            </a>
+                        ) : null}
                     </Alert>
-                )}
+                ) : article ? (
+                    <>
+                        <h1 className="article-page__title fw-bold font-serif mb-3">{article.title}</h1>
+
+                        <div className="d-flex flex-wrap gap-3 align-items-center text-secondary mb-3">
+                            <span className="article-page__author">{article.author || "Người Lao Động"}</span>
+                            {displayTime ? <span className="article-page__date">{displayTime}</span> : null}
+                            <span className="small">Nguồn: {article.source || "nld.com.vn"}</span>
+                        </div>
+
+                        {article.coverImage ? (
+                            <div className="mb-4">
+                                <img
+                                    src={article.coverImage}
+                                    alt={article.title}
+                                    className="w-100 rounded-2"
+                                    style={{ maxHeight: 520, objectFit: "cover" }}
+                                />
+                            </div>
+                        ) : null}
+
+                        <div className="article-content" dangerouslySetInnerHTML={{ __html: safeHtml }} />
+
+                        <div className="mt-5 pt-4 border-top">
+                            <CommentSection articleId={savedKey || article.id} />
+                        </div>
+                    </>
+                ) : null}
             </Container>
         </div>
     );

@@ -2,16 +2,72 @@ import {useEffect, useMemo, useState, type ChangeEvent} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {Alert, Button, Card, Col, Container, Form, ListGroup, Row} from 'react-bootstrap';
 import {BsBookmark, BsBoxArrowRight, BsPerson, BsPersonCircle} from 'react-icons/bs';
-import NewsCard from '../components/NewsCard';
-import {getUserSavedArticles} from '../services/api';
-import {useAppDispatch, useAppSelector} from '../store/hooks';
-import {updateProfile} from '../store/user/user.slice.ts';
-import {logoutUser} from '../store/user/user.actions.ts';
-import type {Article} from '../types';
-import {ViewMode} from '../types';
+import NewsCard from '@/components/NewsCard';
+import {RSS_FEEDS, type RssKey} from '@/data/rss';
+import {fetchCategoryRSS} from '@/services/rss/fetchCategoryRSS';
+import {useAppDispatch, useAppSelector} from '@/store/hooks';
+import {updateProfile} from '@/store/user/user.slice.ts';
+import {logoutUser} from '@/store/user/user.actions.ts';
+import type {Article} from '@/types/types.ts';
+import {ViewMode} from '@/types/types.ts';
 
 type Panel = 'account' | 'saved';
 type Notice = { variant: 'success' | 'secondary'; message: string };
+
+function normalizeUrl(input: string) {
+    const raw = (input || '').trim();
+    if (!raw) return '';
+    try {
+        const u = new URL(raw);
+        u.hash = '';
+        return u.toString().replace(/\/$/, '');
+    } catch {
+        return raw.replace(/\/$/, '');
+    }
+}
+
+function buildFeedKeysFromSavedLinks(savedLinks: string[]): RssKey[] {
+    const set = new Set<RssKey>();
+    set.add('home');
+
+    for (const link of savedLinks) {
+        try {
+            const u = new URL(link);
+            const parts = u.pathname.split('/').filter(Boolean);
+            const first = parts[0];
+            const second = parts[1];
+
+            if (first && (first as keyof typeof RSS_FEEDS) in RSS_FEEDS) set.add(first as RssKey);
+            if (second && (second as keyof typeof RSS_FEEDS) in RSS_FEEDS) set.add(second as RssKey);
+        } catch {
+            // ignore
+        }
+    }
+
+    return Array.from(set);
+}
+
+function buildPlaceholderArticle(link: string): Article {
+    const url = normalizeUrl(link);
+    return {
+        id: url || link,
+        title: url || link,
+        slug: '',
+        categorySlug: 'saved',
+        categoryName: 'Bài đã lưu',
+        description: url,
+        content: '',
+        thumbnail: 'https://via.placeholder.com/300x200?text=NLĐ',
+        coverImage: 'https://via.placeholder.com/1200x630?text=NLĐ',
+        author: 'Người Lao Động',
+        source: 'nld.com.vn',
+        publishedAt: '',
+        tags: [],
+        isFeatured: false,
+        isHot: false,
+        link: url
+    };
+}
 
 function ProfilePage() {
     const navigate = useNavigate();
@@ -35,16 +91,47 @@ function ProfilePage() {
         if (!user) navigate('/login');
     }, [user, navigate]);
 
-    // Lấy danh sách bài đã lưu
+    // Lấy danh sách bài đã lưu (đồng nhất: resolve từ RSS, không dùng mock data)
     useEffect(() => {
-        if (!user)
-            return;
+        if (!user) return;
 
+        const savedLinks = (user.savedArticleIds ?? [])
+            .map(normalizeUrl)
+            .filter(Boolean);
+
+        if (savedLinks.length === 0) {
+            setSavedArticles([]);
+            return;
+        }
+
+        let cancelled = false;
         setLoadingSaved(true);
 
-        getUserSavedArticles(user.id)
-            .then(setSavedArticles)
-            .finally(() => setLoadingSaved(false));
+        (async () => {
+            const feedKeys = buildFeedKeysFromSavedLinks(savedLinks);
+            const lists = await Promise.all(feedKeys.map((k) => fetchCategoryRSS(k)));
+            const pool = lists.flat();
+
+            const byLink = new Map<string, Article>();
+            for (const a of pool) {
+                const link = normalizeUrl(a.link || '');
+                if (link) byLink.set(link, a);
+            }
+
+            const resolved = savedLinks.map((link) => byLink.get(link) ?? buildPlaceholderArticle(link));
+            if (!cancelled) setSavedArticles(resolved);
+        })()
+            .catch(() => {
+                // Nếu RSS lỗi, vẫn render được danh sách link đã lưu
+                if (!cancelled) setSavedArticles(savedLinks.map(buildPlaceholderArticle));
+            })
+            .finally(() => {
+                if (!cancelled) setLoadingSaved(false);
+            });
+
+        return () => {
+            cancelled = true;
+        };
     }, [user?.id, user?.savedArticleIds?.join('|')]);
 
     // Tự động ẩn popup message
