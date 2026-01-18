@@ -5,6 +5,7 @@
     emailOrPhone: string;
     gender: 'male' | 'female' | 'other' | null;
     savedArticleIds: string[];
+    favoritedArticleIds: string[];
     providers: { providerId: string; uid: string }[];
     isVip?: boolean;
     vipExpirationDate?: string | null;

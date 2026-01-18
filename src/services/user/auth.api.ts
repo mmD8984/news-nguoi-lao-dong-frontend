@@ -343,6 +343,7 @@ function toUser(user: FirebaseUser, fallbackName?: string): User {
         emailOrPhone: user.email ?? "",
         gender: null,
         savedArticleIds: [],
+        favoritedArticleIds: [],
         providers: user.providerData.map(p => ({providerId: p.providerId, uid: p.uid})),
     };
 }
@@ -365,6 +366,7 @@ async function fetchUserProfile(fbUser: FirebaseUser): Promise<User> {
                 avatar: data.avatar || fbUser.photoURL || "",
                 gender: data.gender || null,
                 savedArticleIds: data.savedArticleIds || [],
+                favoritedArticleIds: data.favoritedArticleIds || [],
                 providers: fbUser.providerData.map(p => ({ providerId: p.providerId, uid: p.uid })),
                 isVip: data.isVip || false,
                 vipExpirationDate: data.vipExpirationDate || null,
