@@ -13,7 +13,7 @@ import {
     type User as FirebaseUser,
     verifyPasswordResetCode,
 } from "firebase/auth";
-import {get, ref, serverTimestamp, set, update} from "firebase/database";
+import {get, ref, serverTimestamp, set, update, push} from "firebase/database";
 
 import {auth, db} from "../firebase.ts";
 import type {
@@ -24,6 +24,7 @@ import type {
     UpdateUserRequest,
     User,
     VerifyResetPasswordCodeRequest,
+    TransactionRequest,
 } from "@/types/user/user.types";
 
 /**
@@ -228,6 +229,84 @@ export async function updateUserProfile(data: UpdateUserRequest): Promise<User> 
 
 
 /**
+ * Tạo giao dịch mới
+ */
+export async function createTransaction(data: TransactionRequest): Promise<void> {
+    try {
+        const transactionsRef = ref(db, 'transactions');
+        await push(transactionsRef, {
+            ...data,
+            createdAt: serverTimestamp(),
+        });
+    } catch (e) {
+        throw new Error(mapFirebaseError(e));
+    }
+}
+
+/**
+ * Lấy lịch sử giao dịch của user
+ */
+export async function getUserTransactions(userId: string): Promise<any[]> {
+    try {
+        const transactionsRef = ref(db, 'transactions');
+        
+        try {
+            // Thử dùng query trước
+            const { query, orderByChild, equalTo, get } = await import("firebase/database");
+             const q = query(transactionsRef, orderByChild('userId'), equalTo(userId));
+             const snapshot = await get(q);
+             
+             if (snapshot.exists()) {
+                 const data = snapshot.val();
+                 return Object.keys(data).map(key => ({
+                     id: key,
+                     ...data[key]
+                 }));
+             }
+             return [];
+
+        } catch (queryError) {
+             // Fallback nếu lỗi index
+             console.warn("Query failed, fallback to fetch all and filter", queryError);
+             const snapshot = await get(transactionsRef);
+             if (snapshot.exists()) {
+                 const data = snapshot.val();
+                 const allTransactions = Object.keys(data).map(key => ({
+                     id: key,
+                     ...data[key]
+                 }));
+                 return allTransactions.filter((t: any) => t.userId === userId);
+             }
+             return [];
+        }
+
+    } catch (e) {
+        throw new Error(mapFirebaseError(e));
+    }
+}
+
+/**
+ * Cập nhật thông tin gói VIP cho user
+ */
+export async function updateUserSubscription(userId: string, durationDays: number): Promise<void> {
+    try {
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + durationDays);
+
+        const updates: Record<string, any> = {
+            isVip: true,
+            vipExpirationDate: expirationDate.toISOString(),
+            updatedAt: serverTimestamp(),
+        };
+
+        await update(ref(db, `users/${userId}`), updates);
+    } catch (e) {
+        throw new Error(mapFirebaseError(e));
+    }
+}
+
+
+/**
  * ===== Utils ====
  */
 const AUTH_ERROR_MESSAGE: Record<string, string> = {
@@ -287,6 +366,8 @@ async function fetchUserProfile(fbUser: FirebaseUser): Promise<User> {
                 gender: data.gender || null,
                 savedArticleIds: data.savedArticleIds || [],
                 providers: fbUser.providerData.map(p => ({ providerId: p.providerId, uid: p.uid })),
+                isVip: data.isVip || false,
+                vipExpirationDate: data.vipExpirationDate || null,
             };
         }
     } catch (e) {

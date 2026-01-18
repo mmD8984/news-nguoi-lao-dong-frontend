@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import {Col, Container, Row} from 'react-bootstrap';
 import {toast} from "react-toastify";
@@ -7,21 +7,18 @@ import ProfileSidebar from '@/pages/profile/ProfileSidebar';
 import OverviewPanel from '@/pages/profile/panels/OverviewPanel';
 import AccountPanel from '@/pages/profile/panels/AccountPanel';
 import SavedPanel from '@/pages/profile/panels/SavedPanel';
-import ViewedPanel from '@/pages/profile/panels/ViewedPanel';
 import TransactionsPanel from '@/pages/profile/panels/TransactionsPanel';
-import {getUserSavedArticles} from '@/services/api';
 import {useAppDispatch, useAppSelector} from '@/store/hooks';
 import {getCurrentUser} from "@/store/user/user.selectors.ts";
 import {logoutUser} from '@/store/user/user.actions.ts';
-import type {Article} from '@/types';
 
-export type Panel = 'tong-quan' | 'tai-khoan' | 'bai-da-luu' | 'bai-da-xem' | 'binh-luan' | 'giao-dich';
+export type Panel = 'tong-quan' | 'tai-khoan' | 'bai-da-luu' | 'binh-luan' | 'giao-dich';
 
 function ProfilePage() {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const user = useAppSelector(getCurrentUser);
-    const {section} = useParams<{section?: string}>();
+    const {section} = useParams<{ section?: string }>();
 
 
     // Lấy active panel từ URL, mặc định là 'tong-quan'
@@ -34,21 +31,6 @@ function ProfilePage() {
         }
     }, [section, navigate]);
 
-    // Bài viết đã lưu
-    const [savedArticles, setSavedArticles] = useState<Article[]>([]);
-    const [loadingSaved, setLoadingSaved] = useState(false);
-
-    // Lấy danh sách bài đã lưu
-    useEffect(() => {
-        if (!user)
-            return;
-
-        setLoadingSaved(true);
-
-        getUserSavedArticles(user.id)
-            .then(setSavedArticles)
-            .finally(() => setLoadingSaved(false));
-    }, [user?.id, user?.savedArticleIds?.join('|')]);
 
     if (!user) return null;
 
@@ -74,11 +56,11 @@ function ProfilePage() {
                         {active === 'tong-quan' && <OverviewPanel/>}
                         {active === 'tai-khoan' && (
                             <AccountPanel
-                                onSaveSuccess={() => {}}
+                                onSaveSuccess={() => {
+                                }}
                             />
                         )}
-                        {active === 'bai-da-luu' && <SavedPanel articles={savedArticles} loading={loadingSaved}/>}
-                        {active === 'bai-da-xem' && <ViewedPanel/>}
+                        {active === 'bai-da-luu' && <SavedPanel/>}
                         {active === 'giao-dich' && <TransactionsPanel/>}
                     </Col>
                 </Row>

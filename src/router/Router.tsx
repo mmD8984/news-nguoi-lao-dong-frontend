@@ -14,6 +14,7 @@ const SearchPage = lazy(() => import("@/pages/SearchPage"));
 const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 const ResetPasswordPage = lazy(() => import("@/pages/ResetPasswordPage"));
 const ForgotPasswordPage = lazy(() => import("@/pages/ForgotPasswordPage"));
+const SubscriptionPage = lazy(() => import("@/pages/SubscriptionPage"));
 
 const Router = () => {
     return (
@@ -30,6 +31,12 @@ const Router = () => {
                         </Route>
                     </Route>
 
+                    <Route element={<PublicRoute restricted={false}/>}>
+                        <Route element={<AuthLayout/>}>
+                            <Route path="/dang-ky-goi-vip" element={<SubscriptionPage/>}/>
+                        </Route>
+                    </Route>
+                    
                     {/* Public Routes - Các đường dẫn công khai */}
                     <Route path="/" element={<MainLayout/>}>
                         {/* Trang chủ */}
@@ -51,7 +58,8 @@ const Router = () => {
                     {/* Protected Routes - Ngăn người dùng chưa đăng nhập truy cập */}
                     <Route element={<ProtectedRoute/>}>
                         <Route element={<MainLayout/>}>
-                            <Route path="thong-tin-ca-nhan/:section?" element={<ProfilePage/>}/>
+                            <Route path="/thong-tin-ca-nhan/:section?" element={<ProfilePage/>}/>
+                            <Route path="/dang-ky-goi-vip" element={<SubscriptionPage/>}/>
                         </Route>
                     </Route>
                 </Routes>

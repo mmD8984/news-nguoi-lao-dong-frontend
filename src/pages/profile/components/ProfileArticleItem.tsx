@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { BsShare, BsBookmark, BsBookmarkFill } from 'react-icons/bs';
-import type { Article } from '@/types';
+import type { Article } from '@/types/types';
 import { getTimeAgo } from '@/data/utils/dateHelpers';
 
 interface ProfileArticleItemProps {
@@ -20,8 +20,10 @@ function ProfileArticleItem({
     className = '',
     isLast = false
 }: ProfileArticleItemProps) {
-    // Tạo link dựa trên ID bài viết (tương tự như trong OverviewPanel)
-    const articleLink = `/article/${article.id}`;
+    
+    // Tạo link bài viết
+    const originalUrl = article.link || article.id;
+    const articleLink = originalUrl ? `/article/${encodeURIComponent(originalUrl)}` : '#';
     
     // Fallback cho ảnh: ưu tiên thumbnail -> coverImage -> placeholder
     const imageSrc = (article as any).image || article.thumbnail || article.coverImage || 'https://placehold.co/600x400?text=No+Image';
@@ -32,7 +34,7 @@ function ProfileArticleItem({
             <div className={`d-flex gap-4 py-3 ${!isLast ? 'border-bottom' : ''} ${className}`}>
                 {/* Cột trái: Ảnh thumbnail */}
                 <div className="position-relative flex-shrink-0" style={{ width: '260px' }}>
-                    <Link to={articleLink} className="d-block overflow-hidden rounded">
+                    <Link to={articleLink} state={{ article }} className="d-block overflow-hidden rounded">
                         <img 
                             src={imageSrc} 
                             alt={article.title} 
@@ -70,7 +72,7 @@ function ProfileArticleItem({
 
                     {/* Hàng 2: Title */}
                     <h5 className="mb-1 fw-bold font-sans">
-                        <Link to={articleLink} className="text-dark text-decoration-none hover-link">
+                        <Link to={articleLink} state={{ article }} className="text-dark text-decoration-none hover-link">
                             {article.title}
                         </Link>
                     </h5>
@@ -89,7 +91,7 @@ function ProfileArticleItem({
         <div className={`py-2 ${!isLast ? 'border-bottom' : ''} ${className}`}>
              {/* Hàng 1: Title */}
              <h6 className="mb-2 fw-normal">
-                <Link to={articleLink} className="text-dark text-decoration-none hover-link">
+                <Link to={articleLink} state={{ article }} className="text-dark text-decoration-none hover-link">
                     {article.title}
                 </Link>
             </h6>
@@ -116,6 +118,6 @@ function ProfileArticleItem({
             </div>
         </div>
     );
-};
+}
 
 export default ProfileArticleItem;

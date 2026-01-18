@@ -6,6 +6,8 @@
     gender: 'male' | 'female' | 'other' | null;
     savedArticleIds: string[];
     providers: { providerId: string; uid: string }[];
+    isVip?: boolean;
+    vipExpirationDate?: string | null;
 }
 
 export interface RegisterRequest {
@@ -55,4 +57,19 @@ export interface UpdateUserRequest {
     displayName?: string;
     gender?: 'male' | 'female' | 'other' | null;
     avatar?: string;
+}
+
+export interface TransactionRequest {
+    date: string;
+    productName: string;
+    amount: number;
+    paymentMethod: string;
+    status: string;
+    userId?: string;
+    userEmail?: string;
+}
+
+export interface Transaction extends TransactionRequest {
+    id: string;
+    createdAt?: number | object; // Firebase serverTimestamp
 }

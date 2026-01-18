@@ -1,16 +1,23 @@
 import {Card} from 'react-bootstrap';
-import type {Article} from '@/types';
+import {useAppSelector} from '@/store/hooks';
+import {getCurrentUser} from '@/store/user/user.selectors';
+import {useSavedArticlesRTDB} from '@/hooks/useSavedArticlesRTDB';
+import {removeSavedArticle} from '@/services/save/savedArticles.rtdb';
 import ProfileArticleItem from '../components/ProfileArticleItem';
+import type {Article} from '@/types/types';
 
-interface SavedPanelProps {
-    articles: Article[];
-    loading: boolean;
-}
+function SavedPanel() {
+    const user = useAppSelector(getCurrentUser);
+    const {items, loading} = useSavedArticlesRTDB(user?.id);
 
-function SavedPanel({articles, loading}: SavedPanelProps) {
+    const handleToggleBookmark = async (id: string) => {
+        if (!user) return;
+        const article = items.find(a => a.id === id);
 
-    const handleToggleBookmark = (id: string) => {
-        console.log('Toggle bookmark cho', id);
+        // Nếu tìm thấy bài viết (đang có trong list saved), thì xóa nó
+        if (article) {
+            await removeSavedArticle(user.id, article.url);
+        }
     };
 
     return (
@@ -21,19 +28,19 @@ function SavedPanel({articles, loading}: SavedPanelProps) {
             </h4>
 
             {loading ? (
-                <p className="text-secondary mb-0">Loading...</p>
-            ) : articles.length === 0 ? (
+                <p className="text-secondary mb-0">Đang tải...</p>
+            ) : items.length === 0 ? (
                 <p className="text-muted mb-0">Bạn chưa lưu bài viết nào.</p>
             ) : (
                 <div className="d-flex flex-column">
-                    {articles.slice(0, 6).map((a, index, arr) => (
-                        <ProfileArticleItem 
-                            key={a.id} 
-                            article={a} 
+                    {items.map((savedItem, index) => (
+                        <ProfileArticleItem
+                            key={savedItem.id || index}
+                            article={savedItem as unknown as Article}
                             isSaved={true}
                             onToggleBookmark={handleToggleBookmark}
                             showImage={true}
-                            isLast={index === arr.length - 1}
+                            isLast={index === items.length - 1}
                         />
                     ))}
                 </div>

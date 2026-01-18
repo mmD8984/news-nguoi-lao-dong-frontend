@@ -1,16 +1,7 @@
 import type {ComponentType} from 'react';
 import {Card, ListGroup} from 'react-bootstrap';
 import {useNavigate} from 'react-router-dom';
-import {
-    BsBookmark,
-    BsBoxArrowRight,
-    BsPerson,
-    BsPersonCircle,
-    BsGrid,
-    BsEye,
-    BsChatDots,
-    BsClockHistory
-} from 'react-icons/bs';
+import {BsBookmark, BsBoxArrowRight, BsClockHistory, BsGrid, BsPerson, BsPersonCircle} from 'react-icons/bs';
 import type {IconBaseProps} from 'react-icons';
 import type {User} from '@/types/user/user.types';
 import type {Panel} from '@/pages/ProfilePage';
@@ -19,7 +10,7 @@ interface ProfileSidebarProps {
     user: User;
     activePanel: Panel;
     onLogout: () => void;
-}   
+}
 
 // Định nghĩa các menu item
 interface MenuItem {
@@ -49,12 +40,6 @@ const MENU_ITEMS: MenuItem[] = [
         label: 'Bài đã lưu',
         icon: BsBookmark,
         panel: 'bai-da-luu'
-    },
-    {
-        id: 'bai-da-xem',
-        label: 'Bài đã xem',
-        icon: BsEye,
-        panel: 'bai-da-xem'
     },
     {
         id: 'giao-dich',

@@ -132,6 +132,40 @@ export const unlinkAccountAction = createAsyncThunk<
     }
 });
 
+interface SubscribePayload {
+    transaction: any; // Use TransactionRequest type properly if imported
+    durationDays: number;
+}
+
+export const subscribeUser = createAsyncThunk<
+    { isVip: boolean; vipExpirationDate: string }, 
+    SubscribePayload,
+    { rejectValue: string }
+>("user/subscribe", async ({ transaction, durationDays }, thunkApi) => {
+    try {
+        const { createTransaction, updateUserSubscription } = await import("@/services/user/auth.api");
+        
+        // 1. Create transaction
+        await createTransaction(transaction);
+
+        // 2. Update user subscription
+        if (transaction.userId) {
+            await updateUserSubscription(transaction.userId, durationDays);
+        }
+
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + durationDays);
+
+        return {
+            isVip: true,
+            vipExpirationDate: expirationDate.toISOString()
+        };
+
+    } catch (e) {
+        return thunkApi.rejectWithValue(mapError(e));
+    }
+});
+
 function mapError(e: unknown): string {
     if (e instanceof Error && e.message.trim()) return e.message.trim();
     if (typeof e === 'string' && e.trim()) return e.trim();

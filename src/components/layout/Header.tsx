@@ -15,10 +15,12 @@ import {
     BsPersonCircle,
     BsPlayCircle,
     BsSearch,
-    BsXLg
+    BsXLg,
+    BsGem
 } from 'react-icons/bs';
 
 import {useAppDispatch, useAppSelector} from '@/store/hooks.ts';
+import {useSubscription} from '@/hooks/useSubscription';
 import {getCategories} from '@/services/category.ts';
 import type {MegaMenuData} from '@/data/menu';
 import type {NavItem} from '@/types/types.ts';
@@ -40,6 +42,24 @@ const UTILITY_ITEMS = [
     {label: 'Nói thẳng', path: '/noi-thang'},
     {label: 'Tin độc quyền', path: '/doc-quyen'}
 ] as const;
+
+const VipButton = () => {
+    const { isVip } = useSubscription();
+    if (isVip) return null;
+
+    return (
+        <Link 
+            to="/dang-ky-goi-vip" 
+            className="btn rounded-pill text-white d-none d-lg-flex align-items-center gap-2 me-3 px-3"
+            style={{ backgroundColor: '#5c93ed', border: 'none', fontWeight: 600 }}
+        >
+            <div className="d-flex align-items-center justify-content-center rounded-circle" style={{ backgroundColor: 'rgba(255,255,255,0.2)', width: 24, height: 24 }}>
+                <BsGem size={14} />
+            </div>
+            <span>Đăng ký gói bạn đọc VIP</span>
+        </Link>
+    );
+};
 
 function Header() {
     const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
@@ -194,7 +214,10 @@ function Header() {
                         </div>
 
                         {/* Search + user menu */}
-                        <div className="header__actions">
+                        <div className="header__actions d-flex align-items-center">
+                            {/* Đăng ký gói VIP */}
+                            <VipButton />
+
                             {/* Search box */}
                             <form onSubmit={handleSearch} className="header__search box-search d-none d-sm-block">
                                 <input

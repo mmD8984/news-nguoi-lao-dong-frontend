@@ -47,3 +47,13 @@ export const ViewMode = {
 } as const;
 
 export type ViewMode = (typeof ViewMode)[keyof typeof ViewMode];
+
+export interface Package {
+    id: number;
+    name: string;
+    price: number;
+    originalPrice?: number;
+    durationDays: number;
+    discount?: number;
+    note?: string;
+}

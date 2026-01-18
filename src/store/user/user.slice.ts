@@ -7,7 +7,8 @@ import {
     logoutUser,
     registerUser,
     unlinkAccountAction,
-    updateUserProfileAction
+    updateUserProfileAction,
+    subscribeUser
 } from "./user.actions.ts";
 
 
@@ -85,6 +86,14 @@ const userSlice = createSlice({
         // Hủy liên kết
         builder.addCase(unlinkAccountAction.fulfilled, (state, action) => {
             state.currentUser = action.payload;
+        });
+
+        // Đăng ký VIP thành công
+        builder.addCase(subscribeUser.fulfilled, (state, action) => {
+            if (state.currentUser) {
+                state.currentUser.isVip = action.payload.isVip;
+                state.currentUser.vipExpirationDate = action.payload.vipExpirationDate;
+            }
         });
     }
 });
