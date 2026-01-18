@@ -5,12 +5,13 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import CommentSection from "@/components/CommentSection";
 import { useResolvedArticle } from "@/hooks/useResolvedArticle";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { toggleSavedArticle } from "@/store/user/user.slice";
+import { toggleSavedArticle, toggleFavritedArticle  } from "@/store/user/user.slice";
 import type { Article } from "@/types/types.ts";
 import { decodeArticleParam, normalizeUrl } from "@/utils/articleUrl";
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
 import { getCategoryLabelFromSlug } from "@/utils/categoryLabel";
 import { upsertSavedArticle, removeSavedArticle } from "@/services/save/savedArticles.rtdb.ts";
+import {removeFavoriteArticle, upsertFavoriteArticle} from "@/services/favorite/favoriteArticles.rtdb.ts";
 
 
 type LocationState = {
@@ -66,7 +67,10 @@ export default function ArticlePage() {
 
     const openUrl = article?.link || articleUrl;
     const savedKey = normalizeUrl(openUrl);
+    const favoritedKey = normalizeUrl(openUrl);
     const isSaved = Boolean(user && savedKey && user.savedArticleIds.includes(savedKey));
+    const isFavorited = Boolean(user && favoritedKey && user.favoritedArticleIds.includes(favoritedKey));
+
 
     const displayTime = useMemo(() => {
         const raw = article?.publishedAt || "";
@@ -118,7 +122,38 @@ export default function ArticlePage() {
                         ) : null}
 
                         <Button
-                            variant={isSaved ? "danger" : "outline-secondary"}
+                            variant={isFavorited ? "danger" : "outline-secondary"}
+                            size="sm"
+                            onClick={async () => {
+                                if (!favoritedKey) return;
+
+                                if (!user) {
+                                    navigate("/login");
+                                    return;
+                                }
+
+                                try {
+                                    if (isFavorited) {
+                                        await removeFavoriteArticle(user.id, favoritedKey);
+                                    } else {
+                                        if (!article) return;
+                                        await upsertFavoriteArticle(user.id, {
+                                            ...article,
+                                            link: favoritedKey,
+                                        });
+                                    }
+                                    dispatch(toggleFavritedArticle(favoritedKey));
+                                } catch (e) {
+                                    console.error("Lỗi:", e);
+                                }
+                            }}
+                        >
+                            {isFavorited ? "Đã thích" : "Thích"}
+                        </Button>
+
+
+                        <Button
+                            variant={isSaved ? "success" : "outline-secondary"}
                             size="sm"
                             onClick={async () => {
                                 if (!savedKey) return;
@@ -143,10 +178,10 @@ export default function ArticlePage() {
                                     console.error("Lỗi lưu bài:", e);
                                 }
                             }}
-
                         >
                             {isSaved ? "Đã lưu" : "Lưu"}
                         </Button>
+
 
                         <Button variant="outline-secondary" size="sm" onClick={() => navigate(-1)}>
                             ← Quay lại

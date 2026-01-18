@@ -3,7 +3,7 @@ import { db } from "@/services/firebase";
 import type { Article } from "@/types/types";
 import { normalizeUrl } from "@/utils/articleUrl";
 
-/** Hash FNV-1a 32-bit */
+/** Hash FNV-1a 32-bit*/
 function fnv1aHash(input: string) {
     let h = 0x811c9dc5;
     for (let i = 0; i < input.length; i++) {
@@ -13,28 +13,28 @@ function fnv1aHash(input: string) {
     return h.toString(16);
 }
 
-export function savedKeyFromUrl(url: string) {
+export function favoriteKeyFromUrl(url: string) {
     const n = normalizeUrl(url);
-    return `u_${fnv1aHash(n)}`;
+    return `f_${fnv1aHash(n)}`;
 }
 
-export type SavedArticle = Pick<
+export type FavoriteArticle = Pick<
     Article,
     "title" | "description" | "thumbnail" | "coverImage" | "publishedAt" | "source" | "link"
 > & {
     id: string;
     categoryName: string;
     url: string;
-    savedAt: number;
+    favoritedAt: number;
 };
 
-export async function upsertSavedArticle(uid: string, article: Article) {
+export async function upsertFavoriteArticle(uid: string, article: Article) {
     const url = normalizeUrl(article.link || "");
-    if (!uid || !url) throw new Error("Missing uid or url");
+    if (!uid || !url) throw new Error("Thiếu uid hoặc url");
 
-    const key = savedKeyFromUrl(url);
+    const key = favoriteKeyFromUrl(url);
 
-    const payload: SavedArticle = {
+    const payload: FavoriteArticle = {
         url,
         link: url,
         title: article.title,
@@ -43,40 +43,38 @@ export async function upsertSavedArticle(uid: string, article: Article) {
         coverImage: article.coverImage || "",
         publishedAt: article.publishedAt || "",
         source: article.source || "nld.com.vn",
-        savedAt: Date.now(),
+        favoritedAt: Date.now(),
         id: article.id || "",
         categoryName: article.categoryName || "Tin tức",
     };
 
-    await set(ref(db, `users/${uid}/saved/${key}`), payload);
+    await set(ref(db, `users/${uid}/favorites/${key}`), payload);
 }
 
-export async function removeSavedArticle(uid: string, url: string) {
+export async function removeFavoriteArticle(uid: string, url: string) {
     const nurl = normalizeUrl(url);
     if (!uid || !nurl) return;
-    const key = savedKeyFromUrl(nurl);
-    await remove(ref(db, `users/${uid}/saved/${key}`));
+    const key = favoriteKeyFromUrl(nurl);
+    await remove(ref(db, `users/${uid}/favorites/${key}`));
 }
 
-export function subscribeSavedArticles(
+/** Subscribe realtime danh sách bài yêu thích */
+export function subscribeFavoriteArticles(
     uid: string,
-    cb: (items: SavedArticle[]) => void,
+    cb: (items: FavoriteArticle[]) => void,
     onError?: (err: any) => void
 ) {
-    const r = ref(db, `users/${uid}/saved`);
+    const r = ref(db, `users/${uid}/favorites`);
 
-    // onValue trả về unsubscribe function
     const unsubscribe = onValue(
         r,
         (snap) => {
             const val = snap.val() || {};
-            const list: SavedArticle[] = Object.values(val);
-            list.sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+            const list: FavoriteArticle[] = Object.values(val);
+            list.sort((a, b) => (b.favoritedAt || 0) - (a.favoritedAt || 0));
             cb(list);
         },
-        (err) => {
-            onError?.(err);
-        }
+        (err) => onError?.(err)
     );
 
     return unsubscribe;

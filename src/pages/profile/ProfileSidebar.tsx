@@ -1,7 +1,7 @@
 import type {ComponentType} from 'react';
 import {Card, ListGroup} from 'react-bootstrap';
 import {useNavigate} from 'react-router-dom';
-import {BsBookmark, BsBoxArrowRight, BsClockHistory, BsGrid, BsPerson, BsPersonCircle} from 'react-icons/bs';
+import {BsBookmark, BsBoxArrowRight, BsClockHistory, BsGrid, BsHeart, BsPerson, BsPersonCircle} from 'react-icons/bs';
 import type {IconBaseProps} from 'react-icons';
 import type {User} from '@/types/user.types.ts';
 import type {Panel} from '@/pages/ProfilePage';
@@ -34,6 +34,12 @@ const MENU_ITEMS: MenuItem[] = [
         label: 'Thông tin tài khoản',
         icon: BsPerson,
         panel: 'tai-khoan'
+    },
+    {
+        id: 'yeu-thich',
+        label: 'Yêu thích',
+        icon: BsHeart,
+        panel: 'yeu-thich'
     },
     {
         id: 'bai-da-luu',
