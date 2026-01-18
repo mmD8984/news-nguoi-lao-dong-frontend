@@ -7,16 +7,12 @@ import {type SubmitHandler, useForm} from "react-hook-form";
 
 import {useAppDispatch, useAppSelector} from '@/store/hooks';
 import {getCurrentUser} from '@/store/user/user.selectors';
-import {
-    linkGoogleAction,
-    unlinkAccountAction,
-    updateUserProfileAction
-} from "@/store/user/user.actions.ts";
+import {linkGoogleAction, unlinkAccountAction, updateUserProfileAction} from "@/store/user/user.actions.ts";
 
 import {uploadImageToCloudinary} from "@/services/vendor/cloudinary";
 
 import SectionTitle from '../components/SectionTitle';
-import type {UpdateUserRequest} from '@/types/user/user.types';
+import type {UpdateUserRequest} from '@/types/user.types.ts';
 import {registerDisplayNameRules} from "@/utils/formValidation";
 
 interface AccountPanelProps {
@@ -117,10 +113,10 @@ function AccountPanel({onSaveSuccess}: AccountPanelProps) {
             if (linked) {
                 // Nếu đã liên kết -> Hủy liên kết
                 if (user.providers.length <= 1 && !user.providers.some(p => p.providerId === 'password')) {
-                     toast.warning("Bạn cần thiết lập mật khẩu hoặc liên kết tài khoản khác trước khi hủy liên kết này.");
-                     return;
+                    toast.warning("Bạn cần thiết lập mật khẩu hoặc liên kết tài khoản khác trước khi hủy liên kết này.");
+                    return;
                 }
-                
+
                 await dispatch(unlinkAccountAction(providerId)).unwrap();
                 toast.success(`Đã hủy liên kết Google`);
             } else {
@@ -278,8 +274,8 @@ function AccountPanel({onSaveSuccess}: AccountPanelProps) {
                             <FcGoogle size={24}/>
                             <span className="fw-medium text-dark">Tài khoản Google</span>
                         </div>
-                        <Form.Check 
-                            type="switch" 
+                        <Form.Check
+                            type="switch"
                             id="link-google"
                             checked={isLinked('google.com')}
                             onChange={() => handleToggleSocial('google.com')}

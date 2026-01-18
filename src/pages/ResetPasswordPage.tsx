@@ -8,7 +8,7 @@ import {BsEye, BsEyeSlash} from "react-icons/bs";
 import {useAppDispatch} from "@/store/hooks";
 import {confirmResetPassword, verifyResetPasswordCode,} from "@/store/user/user.actions";
 import {confirmPasswordRequiredMessage, resetNewPasswordRules, validateConfirmPassword,} from "@/utils/formValidation";
-import type {ResetPasswordFormData} from "@/types/user/user.types";
+import type {ResetPasswordFormData} from "@/types/user.types.ts";
 
 function ResetPasswordPage() {
     const location = useLocation();

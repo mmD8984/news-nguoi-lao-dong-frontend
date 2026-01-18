@@ -3,17 +3,17 @@ import {
     confirmPasswordReset,
     createUserWithEmailAndPassword,
     GoogleAuthProvider,
+    linkWithPopup,
     sendPasswordResetEmail,
     signInWithEmailAndPassword,
     signInWithPopup,
-    linkWithPopup,
-    unlink,
     signOut,
+    unlink,
     updateProfile,
     type User as FirebaseUser,
     verifyPasswordResetCode,
 } from "firebase/auth";
-import {get, ref, serverTimestamp, set, update, push} from "firebase/database";
+import {get, push, ref, serverTimestamp, set, update} from "firebase/database";
 
 import {auth, db} from "../firebase.ts";
 import type {
@@ -21,11 +21,14 @@ import type {
     LoginRequest,
     RegisterRequest,
     SendResetPasswordRequest,
-    UpdateUserRequest,
-    User,
-    VerifyResetPasswordCodeRequest,
     TransactionRequest,
-} from "@/types/user/user.types";
+    Transaction,
+    UpdateUserRequest,
+    UpdateUserProfilePayload,
+    User,
+    UserSubscriptionUpdate,
+    VerifyResetPasswordCodeRequest,
+} from "@/types/user.types.ts";
 
 /**
  * Đăng ký tài khoản với email và password
@@ -126,7 +129,6 @@ export async function linkAccountWithGoogle(): Promise<User> {
 }
 
 
-
 /**
  * Hủy liên kết tài khoản
  * @param providerId "google.com" | "facebook.com"
@@ -211,7 +213,7 @@ export async function updateUserProfile(data: UpdateUserRequest): Promise<User> 
     }
 
     try {
-        const updates: Record<string, any> = {};
+        const updates: UpdateUserProfilePayload = {};
 
         if (data.displayName !== undefined) updates['displayName'] = data.displayName;
         if (data.gender !== undefined) updates['gender'] = data.gender;
@@ -246,38 +248,38 @@ export async function createTransaction(data: TransactionRequest): Promise<void>
 /**
  * Lấy lịch sử giao dịch của user
  */
-export async function getUserTransactions(userId: string): Promise<any[]> {
+export async function getUserTransactions(userId: string): Promise<Transaction[]> {
     try {
         const transactionsRef = ref(db, 'transactions');
-        
+
         try {
             // Thử dùng query trước
-            const { query, orderByChild, equalTo, get } = await import("firebase/database");
-             const q = query(transactionsRef, orderByChild('userId'), equalTo(userId));
-             const snapshot = await get(q);
-             
-             if (snapshot.exists()) {
-                 const data = snapshot.val();
-                 return Object.keys(data).map(key => ({
-                     id: key,
-                     ...data[key]
-                 }));
-             }
-             return [];
+            const {query, orderByChild, equalTo, get} = await import("firebase/database");
+            const q = query(transactionsRef, orderByChild('userId'), equalTo(userId));
+            const snapshot = await get(q);
+
+            if (snapshot.exists()) {
+                const data = snapshot.val() as Record<string, Omit<Transaction, "id">>;
+                return Object.keys(data).map((key): Transaction => ({
+                    id: key,
+                    ...data[key],
+                }));
+            }
+            return [];
 
         } catch (queryError) {
-             // Fallback nếu lỗi index
-             console.warn("Query failed, fallback to fetch all and filter", queryError);
-             const snapshot = await get(transactionsRef);
-             if (snapshot.exists()) {
-                 const data = snapshot.val();
-                 const allTransactions = Object.keys(data).map(key => ({
-                     id: key,
-                     ...data[key]
-                 }));
-                 return allTransactions.filter((t: any) => t.userId === userId);
-             }
-             return [];
+            // Fallback nếu lỗi index
+            console.warn("Query failed, fallback to fetch all and filter", queryError);
+            const snapshot = await get(transactionsRef);
+            if (snapshot.exists()) {
+                const data = snapshot.val() as Record<string, Omit<Transaction, "id">>;
+                const allTransactions = Object.keys(data).map((key): Transaction => ({
+                    id: key,
+                    ...data[key],
+                }));
+                return allTransactions.filter((t) => t.userId === userId);
+            }
+            return [];
         }
 
     } catch (e) {
@@ -293,7 +295,7 @@ export async function updateUserSubscription(userId: string, durationDays: numbe
         const expirationDate = new Date();
         expirationDate.setDate(expirationDate.getDate() + durationDays);
 
-        const updates: Record<string, any> = {
+        const updates: UserSubscriptionUpdate = {
             isVip: true,
             vipExpirationDate: expirationDate.toISOString(),
             updatedAt: serverTimestamp(),
@@ -365,7 +367,7 @@ async function fetchUserProfile(fbUser: FirebaseUser): Promise<User> {
                 avatar: data.avatar || fbUser.photoURL || "",
                 gender: data.gender || null,
                 savedArticleIds: data.savedArticleIds || [],
-                providers: fbUser.providerData.map(p => ({ providerId: p.providerId, uid: p.uid })),
+                providers: fbUser.providerData.map(p => ({providerId: p.providerId, uid: p.uid})),
                 isVip: data.isVip || false,
                 vipExpirationDate: data.vipExpirationDate || null,
             };

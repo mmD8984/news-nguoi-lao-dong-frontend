@@ -8,13 +8,13 @@ import {BsEye, BsEyeSlash} from "react-icons/bs";
 import {useAppDispatch} from "@/store/hooks";
 import {iconGoogle} from "@/assets";
 import {googleLoginUser, loginUser, registerUser,} from "@/store/user/user.actions.ts";
-import type {LoginFormData, RegisterFormData} from "@/types/user/user.types";
+import type {LoginFormData, RegisterFormData} from "@/types/user.types.ts";
 import {
     confirmPasswordRequiredMessage,
     loginEmailRules,
     loginPasswordRules,
-    registerEmailRules,
     registerDisplayNameRules,
+    registerEmailRules,
     registerPasswordRules,
     validateConfirmPassword,
 } from "@/utils/formValidation";
@@ -348,7 +348,8 @@ function AuthPage() {
                     {/* Divider */}
                     <div className="position-relative mb-4 text-center">
                         <hr/>
-                        <span className="bg-white px-2 text-muted small position-absolute top-50 start-50 translate-middle">
+                        <span
+                            className="bg-white px-2 text-muted small position-absolute top-50 start-50 translate-middle">
                             Hoặc đăng nhập với
                         </span>
                     </div>

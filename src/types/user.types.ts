@@ -59,6 +59,14 @@ export interface UpdateUserRequest {
     avatar?: string;
 }
 
+export type UpdateUserProfilePayload = Partial<Pick<User, "displayName" | "gender" | "avatar">>;
+
+export type UserSubscriptionUpdate = {
+    isVip: boolean;
+    vipExpirationDate: string;
+    updatedAt: number | object;
+};
+
 export interface TransactionRequest {
     date: string;
     productName: string;
@@ -71,5 +79,5 @@ export interface TransactionRequest {
 
 export interface Transaction extends TransactionRequest {
     id: string;
-    createdAt?: number | object; // Firebase serverTimestamp
+    createdAt?: number | object;
 }
