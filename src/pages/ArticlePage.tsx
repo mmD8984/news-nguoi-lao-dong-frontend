@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { Alert, Button, Container, Spinner } from "react-bootstrap";
+import { useMemo, useEffect, useState } from "react";
+import { Alert, Button, Container, Spinner, Modal } from "react-bootstrap";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import CommentSection from "@/components/CommentSection";
@@ -14,7 +14,7 @@ import { upsertSavedArticle, removeSavedArticle } from "@/services/save/savedArt
 
 
 type LocationState = {
-    article?: unknown;
+    article?: Article;
 };
 
 function isArticle(value: unknown): value is Article {
@@ -50,7 +50,19 @@ export default function ArticlePage() {
         return linkNorm === target || idNorm === target ? stateArticleRaw : null;
     }, [stateArticleRaw, articleUrl]);
 
+    const isVipUser = !!(user?.isVip && user.vipExpirationDate && new Date(user.vipExpirationDate) > new Date());
+
     const { article, loading, error } = useResolvedArticle(articleUrl, stateArticle);
+
+    const [showVipModal, setShowVipModal] = useState(false);
+
+    // Kiểm tra quyền truy cập VIP
+    useEffect(() => {
+        const isVipContent = stateArticleRaw?.isVip === true;
+        if (isVipContent && !isVipUser) {
+            setShowVipModal(true);
+        }
+    }, [stateArticleRaw, isVipUser]);
 
     const openUrl = article?.link || articleUrl;
     const savedKey = normalizeUrl(openUrl);
@@ -163,11 +175,10 @@ export default function ArticlePage() {
                     </Alert>
                 ) : article ? (
                     <>
-                        <h1 className="article-page__title fw-bold font-serif mb-3">{article.title}</h1>
-
+                        <h1 className="fs-1 fw-bold font-serif mb-3">{article.title}</h1>
                         <div className="d-flex flex-wrap gap-3 align-items-center text-secondary mb-3">
-                            <span className="article-page__author">{article.author || "Người Lao Động"}</span>
-                            {displayTime ? <span className="article-page__date">{displayTime}</span> : null}
+                            <span className="fw-bold">{article.author || "Người Lao Động"}</span>
+                            {displayTime ? <span className="small">{displayTime}</span> : null}
                             <span className="small">Nguồn: {article.source || "nld.com.vn"}</span>
                         </div>
 
@@ -189,6 +200,31 @@ export default function ArticlePage() {
                         </div>
                     </>
                 ) : null}
+
+                <Modal 
+                    show={showVipModal} 
+                    onHide={() => navigate('/')} 
+                    backdrop="static" 
+                    keyboard={false}
+                    centered
+                >
+                    <Modal.Header closeButton>
+                        <Modal.Title className="text-warning fw-bold">
+                             DÀNH CHO BẠN ĐỌC VIP
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p>Nội dung này dành riêng cho thành viên VIP. Vui lòng đăng ký gói thành viên để tiếp tục xem bài viết này và nhiều nội dung hấp dẫn khác.</p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => navigate('/')}>
+                            Quay lại
+                        </Button>
+                        <Button variant="primary" style={{ backgroundColor: '#2d68c4' }} onClick={() => navigate('/dang-ky-goi-vip')}>
+                            Đăng ký ngay
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             </Container>
         </div>
     );

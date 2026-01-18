@@ -22,7 +22,7 @@ function Footer() {
                         <img src={logoNld} className="logo-img" alt="Báo Người Lao Động"/>
                     </Link>
 
-                    <div className="d-flex flex-wrap gap-3 mt-3 text-secondary footer__links">
+                    <div className="d-flex flex-wrap gap-3 mt-3 text-secondary small">
                         {categories.map((cat) => (
                             <Link
                                 key={cat.path}
@@ -35,7 +35,7 @@ function Footer() {
                     </div>
                 </div>
 
-                <Row className="gy-4 footer__body">
+                <Row className="gy-4 small">
                     <Col md={4} className="pe-md-4">
                         <h6 className="text-uppercase fw-bold mb-2">
                             BÁO NGƯỜI LAO ĐỘNG ĐIỆN TỬ
@@ -80,7 +80,7 @@ function Footer() {
                         </p>
 
                         <h6 className="text-uppercase fw-bold mb-2">LIÊN HỆ QUẢNG CÁO</h6>
-                        <p className="mb-1 text-secondary text-uppercase footer__subheading">
+                        <p className="mb-1 text-secondary text-uppercase small">
                             LIÊN HỆ QUẢNG CÁO BÁO ĐIỆN TỬ
                         </p>
                         <p className="mb-1 text-secondary">

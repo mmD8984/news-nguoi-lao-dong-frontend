@@ -50,86 +50,20 @@
 .news-card-img {
     width: 100%;
     object-fit: cover;
-    transition: transform var(--transition-base);
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: transform;
 }
 
 .news-card:hover .news-card-img {
-    transform: scale(1.05);
+    transform: scale(1.08);
 }
 
 .overflow-hidden-card {
     overflow: hidden;
+    transform: translateZ(0);
 }
 
-/* NewsCard typography helpers */
-.news-card__hero-title {
-    font-size: 28px;
-    line-height: 1.3;
-}
 
-.news-card__desc {
-    font-size: 15px;
-    color: #333;
-    line-height: 1.6;
-}
-
-.news-card__title-sm {
-    font-size: 16px;
-    line-height: 1.35;
-}
-
-.news-card__title-md {
-    font-size: 18px;
-    line-height: 1.3;
-}
-
-.news-card__title-xs {
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-.news-card__category-hero-title {
-    font-size: 26px;
-    line-height: 1.3;
-}
-
-.news-card__category-hero-desc {
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.news-card__title-grid {
-    font-size: 18px;
-    line-height: 1.4;
-}
-
-.news-card__title-dont-miss {
-    font-size: 15px;
-    line-height: 1.4;
-}
-
-.news-card__text-only-title {
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-.news-card__vip {
-    font-size: 10px;
-}
-
-.news-card__badge {
-    font-size: 10px;
-}
-
-.news-card__list-title {
-    font-size: 17px;
-    line-height: 1.4;
-}
-
-.news-card__list-desc {
-    font-size: 14px;
-    line-height: 1.6;
-}
 
 .news-card__media-icon {
     width: 48px;

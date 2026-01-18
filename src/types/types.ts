@@ -15,6 +15,7 @@ export interface Article {
     isFeatured: boolean;
     isHot: boolean;
     link?: string;
+    isVip?: boolean;
 }
 
 // Thêm RSS Article type
