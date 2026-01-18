@@ -35,13 +35,13 @@ function NewsCard({ article, mode, showCategory = true }: NewsCardProps) {
     if (mode === "HERO_TOP_TITLE") {
         return (
             <Link to={href} state={{ article }} className="text-decoration-none text-dark d-block h-100 news-card">
-                <h2 className="news-card__hero-title fw-bold font-serif mb-3 hover-link">
+                <h2 className="fs-3 lh-sm fw-bold font-serif mb-3 hover-link">
                     {title}
                 </h2>
                 <div className="position-relative mb-3 rounded-1 overflow-hidden-card">
                     <img src={coverSrc} alt={title} className="news-card-img article-img-lg" />
                 </div>
-                <p className="news-card__desc text-dark mb-0">
+                <p className="fs-6 lh-base text-dark mb-0">
                     (NLD) - {description}
                 </p>
             </Link>
@@ -54,7 +54,7 @@ function NewsCard({ article, mode, showCategory = true }: NewsCardProps) {
                 <div className="overflow-hidden-card rounded-1 mb-2">
                     <img src={thumbSrc} className="w-100 news-card-img article-img-lg" alt={title} />
                 </div>
-                <h5 className="news-card__title-sm fw-bold font-serif hover-link">
+                <h5 className="fs-6 lh-sm fw-bold font-serif hover-link">
                     {title}
                 </h5>
             </Link>
@@ -64,7 +64,7 @@ function NewsCard({ article, mode, showCategory = true }: NewsCardProps) {
     if (mode === "FOCUS_BOTTOM") {
         return (
             <Link to={href} state={{ article }} className="text-decoration-none text-dark d-block news-card h-100">
-                <h5 className="news-card__title-md fw-bold font-serif hover-link mb-2">
+                <h5 className="fs-5 lh-sm fw-bold font-serif hover-link mb-2">
                     {title}
                 </h5>
                 <p className="text-secondary small mb-0">
@@ -86,7 +86,7 @@ function NewsCard({ article, mode, showCategory = true }: NewsCardProps) {
                         <img src={thumbSrc} alt={title} className="news-card-img article-img-sm" />
                     </div>
                 </div>
-                <h6 className="news-card__title-xs fw-bold font-serif hover-link m-0">
+                <h6 className="small lh-sm fw-bold font-serif hover-link m-0">
                     {title}
                 </h6>
             </Link>
@@ -104,10 +104,10 @@ function NewsCard({ article, mode, showCategory = true }: NewsCardProps) {
                     <img src={thumbSrc} alt={title} className="news-card-img w-100 h-100" />
                 </div>
                 <div className="d-flex flex-column">
-                    <h4 className="news-card__list-title fw-bold font-serif hover-link mb-2">
+                    <h4 className="fs-5 lh-sm fw-bold font-serif hover-link mb-2">
                         {title}
                     </h4>
-                    <p className="news-card__list-desc text-secondary mb-0 font-sans">
+                    <p className="small lh-base text-secondary mb-0 font-sans">
                         {description}
                     </p>
                 </div>

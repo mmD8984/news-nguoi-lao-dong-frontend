@@ -230,7 +230,7 @@ function CategoryPage() {
                             <Col lg={4}>
                                 {sidebarBoxes.map((box) => (
                                     <div key={box.title} className="mb-5">
-                                        <h5 className="sidebar-header-custom">
+                                        <h5 className="fw-bold font-serif text-uppercase text-nld-blue border-bottom border-2 pb-2 mb-3 d-inline-block border-primary">
                                             {box.title}
                                         </h5>
                                         <div className="d-flex flex-column gap-3">
@@ -251,7 +251,7 @@ function CategoryPage() {
                         {/* ===== Related ===== */}
                         {relatedArticles.length > 0 && (
                             <div className="mt-5 pt-4 border-top">
-                                <h5 className="sidebar-header-custom mb-3">
+                                <h5 className="fw-bold font-serif text-uppercase text-nld-blue border-bottom border-2 pb-2 mb-3 d-inline-block border-primary mb-3">
                                     Bài liên quan
                                 </h5>
                                 <Row className="g-3">

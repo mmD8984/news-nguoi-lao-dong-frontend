@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Container, Row, Col, Alert, Spinner } from "react-bootstrap";
 import NewsCard from "@/components/NewsCard";
+import VipSection from "@/components/VipSection";
 import TrendingBar from "@/components/TrendingBar";
 import { ViewMode } from "@/types/types.ts";
 import type { Article } from "@/types/types.ts";
 import { fetchHomeRSS } from "@/services/rss/fetchHomeRSS";
 
-const HomePage: React.FC = () => {
+function HomePage() {
     const [articles, setArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -102,7 +103,7 @@ const HomePage: React.FC = () => {
 
                     {/* ===== TIN NÓNG ===== */}
                     <Col lg={3} className="border-start ps-lg-3">
-                        <h3 className="sidebar-header-custom">Tin nóng</h3>
+                        <h3 className="fw-bold font-serif text-uppercase text-nld-blue border-bottom border-2 pb-2 mb-3 d-inline-block border-primary">Tin nóng</h3>
                         <div className="home-hot-scroll overflow-auto">
                             {hotNews.map(item => (
                                 <div
@@ -119,7 +120,12 @@ const HomePage: React.FC = () => {
                         </div>
                     </Col>
                 </Row>
+            </Container>
 
+            {/* Phần nội dung dành cho hội viên */}
+            <VipSection />
+
+            <Container className="py-3">
                 <TrendingBar />
 
                 <Row className="g-4">
@@ -138,7 +144,7 @@ const HomePage: React.FC = () => {
                     </Col>
 
                     <Col lg={4} className="ps-lg-4">
-                        <h5 className="sidebar-header-custom">
+                        <h5 className="fw-bold font-serif text-uppercase text-nld-blue border-bottom border-2 pb-2 mb-3 d-inline-block border-primary">
                             Tin đọc nhiều
                         </h5>
                         <div className="d-flex flex-column gap-3">
