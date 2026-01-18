@@ -5,12 +5,15 @@
     emailOrPhone: string;
     gender: 'male' | 'female' | 'other' | null;
     savedArticleIds: string[];
+    providers: { providerId: string; uid: string }[];
+    isVip?: boolean;
+    vipExpirationDate?: string | null;
 }
 
 export interface RegisterRequest {
     email: string;
     password: string;
-    fullName: string;
+    displayName: string;
 }
 
 export interface LoginRequest {
@@ -24,7 +27,7 @@ export interface LoginFormData {
 }
 
 export interface RegisterFormData {
-    fullName: string;
+    displayName: string;
     email: string;
     password: string;
     confirmPassword: string;
@@ -48,4 +51,25 @@ export interface VerifyResetPasswordCodeRequest {
 export interface ConfirmResetPasswordRequest {
     oobCode: string;
     newPassword: string;
+}
+
+export interface UpdateUserRequest {
+    displayName?: string;
+    gender?: 'male' | 'female' | 'other' | null;
+    avatar?: string;
+}
+
+export interface TransactionRequest {
+    date: string;
+    productName: string;
+    amount: number;
+    paymentMethod: string;
+    status: string;
+    userId?: string;
+    userEmail?: string;
+}
+
+export interface Transaction extends TransactionRequest {
+    id: string;
+    createdAt?: number | object; // Firebase serverTimestamp
 }

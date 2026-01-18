@@ -1,8 +1,17 @@
 ﻿import {createSlice, type PayloadAction} from '@reduxjs/toolkit';
 import type {User} from '@/types/user/user.types.ts';
-import {googleLoginUser, loginUser, logoutUser, registerUser} from "./user.actions.ts";
+import {
+    googleLoginUser,
+    linkGoogleAction,
+    loginUser,
+    logoutUser,
+    registerUser,
+    unlinkAccountAction,
+    updateUserProfileAction,
+    subscribeUser
+} from "./user.actions.ts";
 
-type UpdateProfilePayload = Partial<Pick<User, 'displayName' | 'avatar' | 'gender'>>;
+
 
 interface UserState {
     currentUser: User | null;
@@ -26,14 +35,7 @@ const userSlice = createSlice({
             state.currentUser = null;
         },
 
-        // Cập nhật profile
-        updateProfile: (state, action: PayloadAction<UpdateProfilePayload>) => {
-            const user = state.currentUser;
-            if (!user)
-                return;
 
-            Object.assign(user, action.payload);
-        },
 
         // Lưu / Xoá bài viết đã lưu
         toggleSavedArticle: (state, action: PayloadAction<string>) => {
@@ -55,20 +57,46 @@ const userSlice = createSlice({
         builder.addCase(registerUser.fulfilled, (state, action) => {
             state.currentUser = action.payload;
         });
+
         // Đăng nhập bằng email, password
         builder.addCase(loginUser.fulfilled, (state, action) => {
             state.currentUser = action.payload;
         });
+
         // Đăng nhập bằng Google
         builder.addCase(googleLoginUser.fulfilled, (state, action) => {
             state.currentUser = action.payload;
         });
+
         // Đăng xuất
         builder.addCase(logoutUser.fulfilled, (state) => {
             state.currentUser = null;
         });
+
+        // Cập nhật profile
+        builder.addCase(updateUserProfileAction.fulfilled, (state, action) => {
+            state.currentUser = action.payload;
+        });
+
+        // Liên kết Google
+        builder.addCase(linkGoogleAction.fulfilled, (state, action) => {
+            state.currentUser = action.payload;
+        });
+
+        // Hủy liên kết
+        builder.addCase(unlinkAccountAction.fulfilled, (state, action) => {
+            state.currentUser = action.payload;
+        });
+
+        // Đăng ký VIP thành công
+        builder.addCase(subscribeUser.fulfilled, (state, action) => {
+            if (state.currentUser) {
+                state.currentUser.isVip = action.payload.isVip;
+                state.currentUser.vipExpirationDate = action.payload.vipExpirationDate;
+            }
+        });
     }
 });
 
-export const {setUser, clearUser, updateProfile, toggleSavedArticle} = userSlice.actions;
+export const {setUser, clearUser, toggleSavedArticle} = userSlice.actions;
 export default userSlice.reducer;

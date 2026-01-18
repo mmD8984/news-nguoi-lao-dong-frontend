@@ -4,16 +4,20 @@ import type {
     LoginRequest,
     RegisterRequest,
     SendResetPasswordRequest,
+    UpdateUserRequest,
     User,
     VerifyResetPasswordCodeRequest,
 } from "@/types/user/user.types.ts";
 import {
     confirmResetPasswordApi,
+    linkAccountWithGoogle,
     login,
     loginWithGoogle,
     logout,
     register,
     sendResetPassword,
+    unlinkAccount,
+    updateUserProfile,
     verifyResetCode,
 } from "@/services/user";
 
@@ -90,6 +94,73 @@ export const confirmResetPassword = createAsyncThunk<
 >("user/confirm-reset-password", async (payload, thunkApi) => {
     try {
         await confirmResetPasswordApi(payload);
+    } catch (e) {
+        return thunkApi.rejectWithValue(mapError(e));
+    }
+});
+
+export const updateUserProfileAction = createAsyncThunk<
+    User, UpdateUserRequest,
+    { rejectValue: string }
+>("user/update-profile", async (payload, thunkApi) => {
+    try {
+        return await updateUserProfile(payload);
+    } catch (e) {
+        return thunkApi.rejectWithValue(mapError(e));
+    }
+});
+
+export const linkGoogleAction = createAsyncThunk<
+    User, void,
+    { rejectValue: string }
+>("user/link-google", async (_, thunkApi) => {
+    try {
+        return await linkAccountWithGoogle();
+    } catch (e) {
+        return thunkApi.rejectWithValue(mapError(e));
+    }
+});
+
+export const unlinkAccountAction = createAsyncThunk<
+    User, string,
+    { rejectValue: string }
+>("user/unlink-account", async (providerId, thunkApi) => {
+    try {
+        return await unlinkAccount(providerId);
+    } catch (e) {
+        return thunkApi.rejectWithValue(mapError(e));
+    }
+});
+
+interface SubscribePayload {
+    transaction: any; // Use TransactionRequest type properly if imported
+    durationDays: number;
+}
+
+export const subscribeUser = createAsyncThunk<
+    { isVip: boolean; vipExpirationDate: string }, 
+    SubscribePayload,
+    { rejectValue: string }
+>("user/subscribe", async ({ transaction, durationDays }, thunkApi) => {
+    try {
+        const { createTransaction, updateUserSubscription } = await import("@/services/user/auth.api");
+        
+        // 1. Create transaction
+        await createTransaction(transaction);
+
+        // 2. Update user subscription
+        if (transaction.userId) {
+            await updateUserSubscription(transaction.userId, durationDays);
+        }
+
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + durationDays);
+
+        return {
+            isVip: true,
+            vipExpirationDate: expirationDate.toISOString()
+        };
+
     } catch (e) {
         return thunkApi.rejectWithValue(mapError(e));
     }

@@ -60,14 +60,7 @@
     resize: none;
 }
 
-.comment-avatar {
-    width: 48px;
-    height: 48px;
-}
 
-.comment-meta {
-    font-size: 13px;
-}
 
 .related-feature-img {
     aspect-ratio: 3 / 2;
@@ -171,108 +164,7 @@
     color: var(--nld-blue);
 }
 
-.comment-tabs {
-    border-bottom: 1px solid var(--nld-border-light);
-    margin-bottom: var(--spacing-6);
-    display: flex;
-    gap: var(--spacing-5);
-}
 
-.comment-tab {
-    padding-bottom: var(--spacing-2);
-    font-weight: 700;
-    color: #999;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-}
-
-.comment-tab.active {
-    color: var(--nld-blue);
-    border-bottom-color: var(--nld-blue);
-}
-
-.article-comments__input.form-control {
-    border-radius: var(--radius-md);
-    padding: var(--spacing-4);
-    min-height: 120px;
-    resize: none;
-}
-
-.article-comments__input.form-control:focus {
-    border-color: var(--nld-blue);
-    box-shadow: 0 0 0 0.25rem rgba(46, 89, 173, 0.15);
-}
-
-.article-comments__submit.btn {
-    min-width: 160px;
-}
-
-.comment-item {
-    display: flex;
-    gap: var(--spacing-4);
-}
-
-.comment-item__avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: #d9d9d9;
-    flex-shrink: 0;
-}
-
-.comment-item__avatar--sm {
-    width: 32px;
-    height: 32px;
-}
-
-.comment-item__avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-    display: block;
-}
-
-.comment-item__author {
-    font-weight: 700;
-    color: #000;
-    margin-bottom: var(--spacing-2);
-}
-
-.comment-item__text {
-    color: #111;
-    line-height: 1.6;
-    margin-bottom: var(--spacing-3);
-}
-
-.comment-item__meta {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-4);
-    color: #6c757d;
-    font-size: 14px;
-}
-
-.comment-item__meta-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    border: none;
-    background: transparent;
-    padding: 0;
-    color: inherit;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-.comment-item__meta-btn:hover {
-    color: var(--nld-blue);
-}
-
-.comment-item__meta-sep {
-    opacity: 0.5;
-}
 
 .related-news-box {
     background-color: var(--nld-gray);

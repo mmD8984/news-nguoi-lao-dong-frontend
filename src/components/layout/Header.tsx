@@ -3,6 +3,7 @@ import {Container} from 'react-bootstrap';
 import {Link, NavLink, useLocation, useNavigate} from 'react-router-dom';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
+import {toast} from 'react-toastify';
 import {
     BsBarChart,
     BsBoxArrowRight,
@@ -14,10 +15,12 @@ import {
     BsPersonCircle,
     BsPlayCircle,
     BsSearch,
-    BsXLg
+    BsXLg,
+    BsGem
 } from 'react-icons/bs';
 
 import {useAppDispatch, useAppSelector} from '@/store/hooks.ts';
+import {useSubscription} from '@/hooks/useSubscription';
 import {getCategories} from '@/services/category.ts';
 import type {MegaMenuData} from '@/data/menu';
 import type {NavItem} from '@/types/types.ts';
@@ -40,6 +43,24 @@ const UTILITY_ITEMS = [
     {label: 'Tin độc quyền', path: '/doc-quyen'}
 ] as const;
 
+const VipButton = () => {
+    const { isVip } = useSubscription();
+    if (isVip) return null;
+
+    return (
+        <Link 
+            to="/dang-ky-goi-vip" 
+            className="btn rounded-pill text-white d-none d-lg-flex align-items-center gap-2 me-3 px-3"
+            style={{ backgroundColor: '#5c93ed', border: 'none', fontWeight: 600 }}
+        >
+            <div className="d-flex align-items-center justify-content-center rounded-circle" style={{ backgroundColor: 'rgba(255,255,255,0.2)', width: 24, height: 24 }}>
+                <BsGem size={14} />
+            </div>
+            <span>Đăng ký gói bạn đọc VIP</span>
+        </Link>
+    );
+};
+
 function Header() {
     const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
@@ -58,7 +79,7 @@ function Header() {
     // Danh sách item trong menu user
     const userMenuItems = useMemo(
         () => [
-            {label: 'Thông tin tài khoản', path: '/profile', icon: 'BsPerson'},
+            {label: 'Thông tin tài khoản', path: '/thong-tin-ca-nhan/tai-khoan', icon: 'BsPerson'},
             {label: 'Đăng xuất', path: '#', icon: 'BsBoxArrowRight'}
         ],
         []
@@ -139,9 +160,9 @@ function Header() {
     };
 
     // Logout: clear redux + về Home
-    const handleLogout = () => {
-        dispatch(logoutUser());
-        setShowUserMenu(false);
+    const handleLogout = async () => {
+        await dispatch(logoutUser());
+        toast.success("Đăng xuất thành công");
         navigate('/');
     };
 
@@ -193,7 +214,10 @@ function Header() {
                         </div>
 
                         {/* Search + user menu */}
-                        <div className="header__actions">
+                        <div className="header__actions d-flex align-items-center">
+                            {/* Đăng ký gói VIP */}
+                            <VipButton />
+
                             {/* Search box */}
                             <form onSubmit={handleSearch} className="header__search box-search d-none d-sm-block">
                                 <input
@@ -238,7 +262,7 @@ function Header() {
                                                 ? <img src={user.avatar} alt="avatar"/>
                                                 : <BsPersonCircle size={30} className="text-secondary"/>
                                             }
-                                            <Link to="/profile" className="text-dark text-truncate">
+                                            <Link to="/thong-tin-ca-nhan" className="text-dark text-truncate">
                                                 {user.displayName}
                                             </Link>
                                         </div>

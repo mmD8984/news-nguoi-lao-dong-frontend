@@ -1,0 +1,102 @@
+.subscription-page {
+    font-family: $font-primary;
+
+    .page-title {
+        font-family: $font-secondary;
+        color: $nld-dark;
+    }
+
+    .brand-blue-text {
+        color: $nld-blue;
+    }
+
+    .subscription-step-1 {
+        .package-card {
+            cursor: pointer;
+            transition: all 0.2s;
+            border-width: 1px;
+            overflow: hidden;
+            border-radius: 8px;
+            background-color: #fff;
+            border-color: $nld-border;
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+            }
+
+            &.selected {
+                border-color: $nld-blue;
+                background-color: rgba(46, 89, 173, 0.05);
+            }
+
+            .checkmark-badge {
+                position: absolute;
+                top: 0;
+                right: 0;
+                color: #fff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+                border-bottom-left-radius: 10px;
+                border-top-right-radius: 0px;
+                background-color: $nld-blue;
+            }
+            
+            .discount-badge {
+                font-size: 0.9rem;
+                background-color: $nld-blue;
+            }
+        }
+
+        .btn-select-package {
+             background-color: $nld-blue;
+             border-color: $nld-blue;
+             
+             &:hover {
+                 background-color: darken($nld-blue, 10%);
+                 border-color: darken($nld-blue, 10%);
+             }
+        }
+    }
+
+    .subscription-step-2 {
+        .btn-payment-large {
+             background-color: $nld-blue;
+             border-color: $nld-blue;
+             
+             &:hover {
+                 background-color: darken($nld-blue, 10%);
+                 border-color: darken($nld-blue, 10%);
+             }
+        }
+        .payment-method-card {
+             cursor: pointer;
+             transition: all 0.2s;
+             border-width: 2px;
+             
+             &:hover {
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+             }
+
+             &.selected {
+                 border-color: $nld-blue;
+                 background-color: rgba($nld-blue, 0.1);
+                 transform: translateY(-2px);
+             }
+             
+             .icon-wrapper {
+                 width: 48px;
+                 height: 48px;
+                 display: flex;
+                 align-items: center;
+                 justify-content: center;
+                 background-color: #fff;
+                 border-radius: 0.25rem;
+                 box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+             }
+        }
+    }
+}

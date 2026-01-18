@@ -22,6 +22,8 @@ export type SavedArticle = Pick<
     Article,
     "title" | "description" | "thumbnail" | "coverImage" | "publishedAt" | "source" | "link"
 > & {
+    id: string;
+    categoryName: string;
     url: string;
     savedAt: number;
 };
@@ -42,6 +44,8 @@ export async function upsertSavedArticle(uid: string, article: Article) {
         publishedAt: article.publishedAt || "",
         source: article.source || "nld.com.vn",
         savedAt: Date.now(),
+        id: article.id || "",
+        categoryName: article.categoryName || "Tin tức",
     };
 
     await set(ref(db, `users/${uid}/saved/${key}`), payload);

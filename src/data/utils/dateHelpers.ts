@@ -28,3 +28,22 @@ export function formatCommentTime(createdAt: string, now: Date): string {
   const hours = Math.max(1, diffHours);
   return `${hours} giờ trước`;
 }
+
+export function getTimeAgo(publishedAt: string): string {
+  const now = dayjs();
+  const published = dayjs(publishedAt);
+  
+  if (!published.isValid()) return '';
+  
+  const diffMinutes = now.diff(published, 'minute');
+  const diffHours = now.diff(published, 'hour');
+  const diffDays = now.diff(published, 'day');
+  
+  if (diffMinutes < 60) {
+    return `${Math.max(1, diffMinutes)} phút trước`;
+  } else if (diffHours < 24) {
+    return `${diffHours} giờ trước`;
+  } else {
+    return `${diffDays} ngày trước`;
+  }
+}
