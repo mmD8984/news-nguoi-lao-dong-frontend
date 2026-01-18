@@ -1,4 +1,4 @@
-import type { Article } from "../../types";
+import type { Article } from "@/types/types.ts";
 
 /* ===== Helpers ===== */
 function cleanText(html: string, maxLength = 150) {

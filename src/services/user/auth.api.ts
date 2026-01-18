@@ -15,7 +15,7 @@ import {
 } from "firebase/auth";
 import {get, ref, serverTimestamp, set, update} from "firebase/database";
 
-import {auth, db} from "./firebase";
+import {auth, db} from "../firebase.ts";
 import type {
     ConfirmResetPasswordRequest,
     LoginRequest,
