@@ -9,6 +9,9 @@ import { toggleSavedArticle } from "@/store/user/user.slice";
 import type { Article } from "@/types/types.ts";
 import { decodeArticleParam, normalizeUrl } from "@/utils/articleUrl";
 import { sanitizeHtml } from "@/utils/sanitizeHtml";
+import { getCategoryLabelFromSlug } from "@/utils/categoryLabel";
+import { upsertSavedArticle, removeSavedArticle } from "@/services/save/savedArticles.rtdb.ts";
+
 
 type LocationState = {
     article?: unknown;
@@ -61,6 +64,10 @@ export default function ArticlePage() {
 
     const safeHtml = useMemo(() => sanitizeHtml(article?.content || ""), [article?.content]);
 
+    const categoryLabel = useMemo(() => {
+        return article?.categorySlug ? getCategoryLabelFromSlug(article.categorySlug) : "";
+    }, [article?.categorySlug]);
+
     if (!id) {
         return (
             <Container className="py-4">
@@ -75,14 +82,14 @@ export default function ArticlePage() {
                 {/* Toolbar */}
                 <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
                     <div className="text-secondary small">
-                        <Link to="/" className="text-decoration-none text-secondary hover-link">
-                            Trang chủ
-                        </Link>
-                        {article?.categoryName ? (
-                            <>
-                                <span className="mx-2">/</span>
-                                <span className="text-dark fw-bold">{article.categoryName}</span>
-                            </>
+                        {article?.categorySlug ? (
+                            <Link
+                                to={`/${encodeURIComponent(article.categorySlug)}`}
+                                className="badge rounded-pill bg-nld-blue text-white text-decoration-none"
+                                style={{ fontSize: 12, padding: "6px 10px" }}
+                            >
+                                {categoryLabel}
+                            </Link>
                         ) : null}
                     </div>
 
@@ -101,16 +108,32 @@ export default function ArticlePage() {
                         <Button
                             variant={isSaved ? "danger" : "outline-secondary"}
                             size="sm"
-                            onClick={() => {
+                            onClick={async () => {
                                 if (!savedKey) return;
+
                                 if (!user) {
                                     navigate("/login");
                                     return;
                                 }
-                                dispatch(toggleSavedArticle(savedKey));
+
+                                try {
+                                    if (isSaved) {
+                                        await removeSavedArticle(user.id, savedKey);
+                                    } else {
+                                        if (!article) return;
+                                        await upsertSavedArticle(user.id, {
+                                            ...article,
+                                            link: savedKey,
+                                        });
+                                    }
+                                    dispatch(toggleSavedArticle(savedKey));
+                                } catch (e) {
+                                    console.error("Lỗi lưu bài:", e);
+                                }
                             }}
+
                         >
-                            {isSaved ? "Đã lưu" : "⭐ Lưu"}
+                            {isSaved ? "Đã lưu" : "Lưu"}
                         </Button>
 
                         <Button variant="outline-secondary" size="sm" onClick={() => navigate(-1)}>

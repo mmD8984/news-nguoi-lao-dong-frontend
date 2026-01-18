@@ -8,7 +8,7 @@ import TrendingBar from "@/components/TrendingBar";
 import type { Article, NavItem } from "@/types/types.ts";
 import { ViewMode } from "@/types/types.ts";
 
-import { getCategories } from "@/services/api";
+import { getCategories } from "@/services/category.ts";
 import { fetchCategoryRSS } from "@/services/rss/fetchCategoryRSS.ts";
 import type { RssKey } from "@/data/rss";
 
@@ -24,7 +24,7 @@ function CategoryPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        setLoading(true);
+        setTimeout(() => setLoading(true));
 
         async function load() {
             const nav = await getCategories();
