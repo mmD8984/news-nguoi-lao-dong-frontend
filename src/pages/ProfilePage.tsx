@@ -6,13 +6,14 @@ import {toast} from "react-toastify";
 import ProfileSidebar from '@/pages/profile/ProfileSidebar';
 import OverviewPanel from '@/pages/profile/panels/OverviewPanel';
 import AccountPanel from '@/pages/profile/panels/AccountPanel';
+import FavoritePanel from '@/pages/profile/panels/FavoritePanel';
 import SavedPanel from '@/pages/profile/panels/SavedPanel';
 import TransactionsPanel from '@/pages/profile/panels/TransactionsPanel';
 import {useAppDispatch, useAppSelector} from '@/store/hooks';
 import {getCurrentUser} from "@/store/user/user.selectors.ts";
 import {logoutUser} from '@/store/user/user.actions.ts';
 
-export type Panel = 'tong-quan' | 'tai-khoan' | 'bai-da-luu' | 'binh-luan' | 'giao-dich';
+export type Panel = 'tong-quan' | 'tai-khoan' | 'yeu-thich'| 'bai-da-luu' | 'binh-luan' | 'giao-dich';
 
 function ProfilePage() {
     const navigate = useNavigate();
@@ -37,7 +38,7 @@ function ProfilePage() {
     return (
         <div className="profile-page bg-light font-sans py-4 py-lg-5 min-vh-100">
             <Container>
-                <Row className="g-4">
+                <Row className="g-5">
                     {/* Sidebar profile */}
                     <Col lg={3}>
                         <ProfileSidebar
@@ -60,6 +61,7 @@ function ProfilePage() {
                                 }}
                             />
                         )}
+                        {active === 'yeu-thich' && <FavoritePanel/>}
                         {active === 'bai-da-luu' && <SavedPanel/>}
                         {active === 'giao-dich' && <TransactionsPanel/>}
                     </Col>

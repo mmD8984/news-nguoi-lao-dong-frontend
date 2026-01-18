@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/services/firebase";
-import type { SavedArticle } from "@/services/save/savedArticles.rtdb";
-import { subscribeSavedArticles } from "@/services/save/savedArticles.rtdb";
+import type { FavoriteArticle } from "@/services/favorite/favoriteArticles.rtdb";
+import { subscribeFavoriteArticles } from "@/services/favorite/favoriteArticles.rtdb";
 
-export function useSavedArticlesRTDB(uidFromStore?: string) {
-    const [items, setItems] = useState<SavedArticle[]>([]);
+export function useFavoriteArticlesRTDB(uidFromStore?: string) {
+    const [items, setItems] = useState<FavoriteArticle[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -28,15 +28,15 @@ export function useSavedArticlesRTDB(uidFromStore?: string) {
 
             if (unsubscribeDB) unsubscribeDB();
 
-            unsubscribeDB = subscribeSavedArticles(
+            unsubscribeDB = subscribeFavoriteArticles(
                 uid,
                 (list) => {
                     setItems(list);
                     setLoading(false);
                 },
                 (err) => {
-                    console.error("RTDB subscribe error:", err);
-                    setError(err?.message || "Không thể tải bài đã lưu");
+                    console.error("RTDB favorite subscribe error:", err);
+                    setError(err?.message || "Không thể tải bài yêu thích");
                     setLoading(false);
                 }
             );

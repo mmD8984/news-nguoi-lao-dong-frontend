@@ -51,6 +51,20 @@ const userSlice = createSlice({
             else
                 user.savedArticleIds.unshift(articleId);
         },
+        // Thích / Xoá bài viết đã thích
+        toggleFavritedArticle: (state, action: PayloadAction<string>) => {
+            const user = state.currentUser;
+            if (!user)
+                return;
+
+            const articleId = action.payload;
+            const idx = user.favoritedArticleIds.indexOf(articleId);
+
+            if (idx >= 0)
+                user.favoritedArticleIds.splice(idx, 1);
+            else
+                user.favoritedArticleIds.unshift(articleId);
+        },
     },
     extraReducers: (builder) => {
         // Đăng ký tài khoản với email, password
@@ -98,5 +112,5 @@ const userSlice = createSlice({
     }
 });
 
-export const {setUser, clearUser, toggleSavedArticle} = userSlice.actions;
+export const {setUser, clearUser, toggleSavedArticle, toggleFavritedArticle} = userSlice.actions;
 export default userSlice.reducer;
