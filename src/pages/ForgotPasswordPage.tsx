@@ -6,7 +6,7 @@ import {toast} from "react-toastify";
 
 import {useAppDispatch} from "@/store/hooks";
 import {sendResetPasswordEmail} from "@/store/user/user.actions";
-import type {ResetPasswordFormData} from "@/types/user/user.types";
+import type {ResetPasswordFormData} from "@/types/user.types.ts";
 import {resetPasswordEmailRules} from "@/utils/formValidation";
 
 function ForgotPasswordPage() {

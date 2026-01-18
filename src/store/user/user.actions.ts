@@ -4,10 +4,11 @@ import type {
     LoginRequest,
     RegisterRequest,
     SendResetPasswordRequest,
+    TransactionRequest,
     UpdateUserRequest,
     User,
     VerifyResetPasswordCodeRequest,
-} from "@/types/user/user.types.ts";
+} from "@/types/user.types.ts";
 import {
     confirmResetPasswordApi,
     linkAccountWithGoogle,
@@ -133,18 +134,18 @@ export const unlinkAccountAction = createAsyncThunk<
 });
 
 interface SubscribePayload {
-    transaction: any; // Use TransactionRequest type properly if imported
+    transaction: TransactionRequest;
     durationDays: number;
 }
 
 export const subscribeUser = createAsyncThunk<
-    { isVip: boolean; vipExpirationDate: string }, 
+    { isVip: boolean; vipExpirationDate: string },
     SubscribePayload,
     { rejectValue: string }
->("user/subscribe", async ({ transaction, durationDays }, thunkApi) => {
+>("user/subscribe", async ({transaction, durationDays}, thunkApi) => {
     try {
-        const { createTransaction, updateUserSubscription } = await import("@/services/user/auth.api");
-        
+        const {createTransaction, updateUserSubscription} = await import("@/services/user/auth.api");
+
         // 1. Create transaction
         await createTransaction(transaction);
 

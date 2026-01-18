@@ -1,27 +1,16 @@
 import {combineReducers, configureStore} from "@reduxjs/toolkit";
-import {
-    persistStore,
-    persistReducer,
-    FLUSH,
-    REHYDRATE,
-    PAUSE,
-    PERSIST,
-    PURGE,
-    REGISTER,
-} from "redux-persist";
+import {FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, REHYDRATE,} from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import userReducer from "./user/user.slice.ts";
-import commentsReducer from "./commentsSlice";
 
 const rootReducer = combineReducers({
     user: userReducer,
-    comments: commentsReducer,
 });
 
 const persistConfig = {
     key: "root",
     storage,
-    whitelist: ["user", "comments"],
+    whitelist: ["user"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

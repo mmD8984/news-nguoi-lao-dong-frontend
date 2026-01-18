@@ -3,7 +3,7 @@ import {Card, ListGroup} from 'react-bootstrap';
 import {useNavigate} from 'react-router-dom';
 import {BsBookmark, BsBoxArrowRight, BsClockHistory, BsGrid, BsHeart, BsPerson, BsPersonCircle} from 'react-icons/bs';
 import type {IconBaseProps} from 'react-icons';
-import type {User} from '@/types/user/user.types';
+import type {User} from '@/types/user.types.ts';
 import type {Panel} from '@/pages/ProfilePage';
 
 interface ProfileSidebarProps {

@@ -58,3 +58,62 @@ export interface Package {
     discount?: number;
     note?: string;
 }
+
+export interface Reply {
+    id: string;
+    authorId?: string;
+    authorName: string;
+    authorAvatar?: string;
+    text: string;
+    createdAt: string;
+}
+
+export interface Comment {
+    id: string;
+    authorId?: string;
+    authorName: string;
+    authorAvatar?: string;
+    text: string;
+    createdAt: string;
+    likedByUserIds: string[];
+    likes: number;
+    replies: Reply[];
+    repliesCount: number;
+}
+
+export type CommentRecord = {
+    authorId?: string;
+    authorName?: string;
+    authorAvatar?: string;
+    text?: string;
+    createdAt?: number | string | object;
+    likedBy?: Record<string, true>;
+    likes?: number;
+    replies?: Comment["replies"] | Record<string, ReplyRecord>;
+    repliesCount?: number;
+};
+
+export type ReplyRecord = {
+    authorId?: string;
+    authorName?: string;
+    authorAvatar?: string;
+    text?: string;
+    createdAt?: number | string | object;
+};
+
+export type AddCommentPayload = {
+    articleId: string;
+    text: string;
+    authorId: string;
+    authorName: string;
+    authorAvatar?: string;
+};
+
+export type AddReplyPayload = {
+    articleId: string;
+    parentCommentId: string;
+    text: string;
+    authorId: string;
+    authorName: string;
+    authorAvatar?: string;
+};

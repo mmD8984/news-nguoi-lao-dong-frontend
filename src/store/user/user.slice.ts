@@ -1,17 +1,15 @@
 ﻿import {createSlice, type PayloadAction} from '@reduxjs/toolkit';
-import type {User} from '@/types/user/user.types.ts';
+import type {User} from '@/types/user.types.ts';
 import {
     googleLoginUser,
     linkGoogleAction,
     loginUser,
     logoutUser,
     registerUser,
+    subscribeUser,
     unlinkAccountAction,
-    updateUserProfileAction,
-    subscribeUser
+    updateUserProfileAction
 } from "./user.actions.ts";
-
-
 
 interface UserState {
     currentUser: User | null;
@@ -34,7 +32,6 @@ const userSlice = createSlice({
         clearUser: (state) => {
             state.currentUser = null;
         },
-
 
 
         // Lưu / Xoá bài viết đã lưu

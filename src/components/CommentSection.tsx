@@ -1,13 +1,18 @@
-import {useMemo, useState} from 'react';
-import {Button, Form, Modal, Nav, Image} from 'react-bootstrap';
+import {useEffect, useMemo, useState} from 'react';
+import {Button, Form, Image, Modal, Nav} from 'react-bootstrap';
 import {useNavigate} from 'react-router-dom';
 import {BsHandThumbsUp} from 'react-icons/bs';
 
 import {useAuth} from '@/hooks/useAuth';
-import {useAppDispatch, useAppSelector} from '@/store/hooks';
-import {addComment, addReply, toggleLike} from '@/store/commentsSlice';
+import {
+    addComment,
+    addReply,
+    fetchCommentsByArticle,
+    toggleCommentLike
+} from '@/services/comment/comment.api';
 import {formatCommentTime} from '@/data/utils/dateHelpers';
 import {getUserAvatarUrl} from '@/data/utils/userHelpers';
+import type {Comment} from '@/types/types';
 
 type CommentTab = 'new' | 'top';
 
@@ -40,13 +45,27 @@ function compareByScoreDesc(
 }
 
 export default function CommentSection({articleId}: CommentSectionProps) {
-    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const {user, isAuthenticated} = useAuth();
-    const commentsByArticleId = useAppSelector((state) => state.comments.byArticleId);
+    const [comments, setComments] = useState<Comment[]>([]);
 
-    // Data comment theo bài viết
-    const comments = commentsByArticleId[articleId] ?? [];
+    async function refreshComments() {
+        if (!articleId) {
+            setComments([]);
+            return;
+        }
+        try {
+            const items = await fetchCommentsByArticle(articleId);
+            setComments(items);
+        } catch (e) {
+            console.error("Lỗi tải bình luận:", e);
+        }
+    }
+
+    // Load comments theo bài viết (simple useEffect)
+    useEffect(() => {
+        void refreshComments();
+    }, [articleId]);
 
     const [tab, setTab] = useState<CommentTab>('top');
     const [text, setText] = useState('');
@@ -75,39 +94,45 @@ export default function CommentSection({articleId}: CommentSectionProps) {
     }
 
     // Gửi comment
-    function submitComment() {
+    async function submitComment() {
         if (requireLogin()) return;
         if (!user) return;
 
-        dispatch(
-            addComment({
+        try {
+            await addComment({
                 articleId: articleId,
                 text: text,
                 authorId: user.id,
                 authorName: user.displayName,
                 authorAvatar: user.avatar || ''
-            })
-        );
-        setText('');
+            });
+            setText('');
+            await refreshComments();
+        } catch (e) {
+            console.error("Lỗi gửi bình luận:", e);
+        }
     }
 
     // Gửi reply cho 1 comment
-    function submitReply(parentCommentId: string) {
+    async function submitReply(parentCommentId: string) {
         if (requireLogin()) return;
         if (!user) return;
 
-        dispatch(
-            addReply({
+        try {
+            await addReply({
                 articleId: articleId,
                 parentCommentId: parentCommentId,
                 text: replyText,
                 authorId: user.id,
                 authorName: user.displayName,
                 authorAvatar: user.avatar || ''
-            })
-        );
-        setReplyText('');
-        setReplyingTo(null);
+            });
+            setReplyText('');
+            setReplyingTo(null);
+            await refreshComments();
+        } catch (e) {
+            console.error("Lỗi gửi trả lời:", e);
+        }
     }
 
     return (
@@ -184,12 +209,12 @@ export default function CommentSection({articleId}: CommentSectionProps) {
                             <div key={c.id} className="comment-item d-flex gap-3">
                                 {/* Avatar */}
                                 <div className="comment-item__avatar flex-shrink-0">
-                                    <Image 
-                                        src={avatarUrl} 
-                                        alt={displayName} 
-                                        roundedCircle 
-                                        width={48} 
-                                        height={48} 
+                                    <Image
+                                        src={avatarUrl}
+                                        alt={displayName}
+                                        roundedCircle
+                                        width={48}
+                                        height={48}
                                         style={{objectFit: 'cover'}}
                                     />
                                 </div>
@@ -207,20 +232,21 @@ export default function CommentSection({articleId}: CommentSectionProps) {
                                             type="button"
                                             className="btn btn-link p-0 text-decoration-none text-secondary d-flex align-items-center gap-1"
                                             style={{fontSize: '0.9rem'}}
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 if (requireLogin()) return;
                                                 if (!user) return;
-                                                dispatch(toggleLike({
-                                                    articleId: articleId,
-                                                    commentId: c.id,
-                                                    userId: user.id
-                                                }));
+                                                try {
+                                                    await toggleCommentLike(articleId, c.id, user.id);
+                                                    await refreshComments();
+                                                } catch (e) {
+                                                    console.error("Lỗi thả like:", e);
+                                                }
                                             }}
                                         >
-                                            <BsHandThumbsUp className={c.likes > 0 ? "text-primary" : ""} />
+                                            <BsHandThumbsUp className={c.likes > 0 ? "text-primary" : ""}/>
                                             <span>{c.likes > 0 ? c.likes : 'Thích'}</span>
                                         </button>
-                                        
+
                                         <button
                                             type="button"
                                             className="btn btn-link p-0 text-decoration-none text-secondary"
@@ -237,7 +263,7 @@ export default function CommentSection({articleId}: CommentSectionProps) {
                                         >
                                             Trả lời
                                         </button>
-                                        
+
                                         <span className="text-muted small" style={{fontSize: '0.85rem'}}>
                                             {formatCommentTime(c.createdAt, new Date())}
                                         </span>
@@ -254,18 +280,19 @@ export default function CommentSection({articleId}: CommentSectionProps) {
                                                 return (
                                                     <div key={r.id} className="d-flex gap-3">
                                                         <div className="flex-shrink-0">
-                                                            <Image 
-                                                                src={replyAvatarUrl} 
-                                                                alt={replyDisplayName} 
-                                                                roundedCircle 
-                                                                width={32} 
+                                                            <Image
+                                                                src={replyAvatarUrl}
+                                                                alt={replyDisplayName}
+                                                                roundedCircle
+                                                                width={32}
                                                                 height={32}
-                                                                style={{objectFit: 'cover'}} 
+                                                                style={{objectFit: 'cover'}}
                                                             />
                                                         </div>
                                                         <div className="flex-grow-1">
                                                             <div className="bg-light p-2 rounded-3 mb-1">
-                                                                <div className="fw-bold text-dark small">{replyDisplayName}</div>
+                                                                <div
+                                                                    className="fw-bold text-dark small">{replyDisplayName}</div>
                                                                 <div className="text-secondary small">{r.text}</div>
                                                             </div>
                                                             <div className="text-muted small ms-1">
@@ -281,11 +308,11 @@ export default function CommentSection({articleId}: CommentSectionProps) {
                                     {/* Ô nhập reply */}
                                     {replyingTo === c.id && (
                                         <div className="mt-3">
-                                           <div className="d-flex gap-2">
-                                                 <Image 
-                                                    src={isAuthenticated && user ? getUserAvatarUrl(user.displayName, user.avatar) : getUserAvatarUrl('Guest')} 
-                                                    roundedCircle 
-                                                    width={32} 
+                                            <div className="d-flex gap-2">
+                                                <Image
+                                                    src={isAuthenticated && user ? getUserAvatarUrl(user.displayName, user.avatar) : getUserAvatarUrl('Guest')}
+                                                    roundedCircle
+                                                    width={32}
                                                     height={32}
                                                     style={{objectFit: 'cover'}}
                                                 />
@@ -325,7 +352,7 @@ export default function CommentSection({articleId}: CommentSectionProps) {
                                                         </div>
                                                     </Form>
                                                 </div>
-                                           </div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
