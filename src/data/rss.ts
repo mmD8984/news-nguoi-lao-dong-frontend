@@ -31,6 +31,10 @@ export const RSS_FEEDS = {
         "thu-ban-doc": "https://nld.com.vn/rss/ban-doc/thu-ban-doc.rss",
     // mục net zero - các mục con không có rss
     "net-zero": "https://nld.com.vn/rss/net-zero.rss",
+        "tin-tuc-xu-huong": "https://nld.com.vn/rss/net-zero/tin-tuc-xu-huong.rss",
+        "chuyen-doi-xanh": "https://nld.com.vn/rss/net-zero/chuyen-doi-xanh.rss",
+        "song-xanh": "https://nld.com.vn/rss/net-zero/song-xanh.rss",
+        "cam-nang": "https://nld.com.vn/rss/net-zero/cam-nang.rss",
     // mục kinh tế
     "kinh-te": "https://nld.com.vn/rss/kinh-te.rss",
         "kinh-doanh": "https://nld.com.vn/rss/kinh-te/kinh-doanh.rss",
@@ -72,7 +76,7 @@ export const RSS_FEEDS = {
         "bong-da": "https://nld.com.vn/rss/the-thao/bong-da.rss",
         "golf": "https://nld.com.vn/rss/the-thao/golf.rss",
         "hau-truong": "https://nld.com.vn/rss/the-thao/hau-truong.rss",
-        "cac-mon-khac": "https://nld.com.vn/rss/the-thacac-mon-khaco/cac-mon-khac.rss",
+        "cac-mon-khac": "https://nld.com.vn/rss/the-thao/cac-mon-khac.rss",
         "tennis": "https://nld.com.vn/rss/the-thao/tennis.rss",
         "marathon": "https://nld.com.vn/rss/the-thao/marathon.rss",
     // mục ai 365
