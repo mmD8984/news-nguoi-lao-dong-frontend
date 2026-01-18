@@ -69,7 +69,7 @@ export default function ArticlePage() {
     const savedKey = normalizeUrl(openUrl);
     const favoritedKey = normalizeUrl(openUrl);
     const isSaved = Boolean(user && savedKey && user.savedArticleIds.includes(savedKey));
-    const isFavorited = Boolean(user && favoritedKey && user.savedArticleIds.includes(favoritedKey));
+    const isFavorited = Boolean(user && favoritedKey && user.favoritedArticleIds.includes(favoritedKey));
 
 
     const displayTime = useMemo(() => {
